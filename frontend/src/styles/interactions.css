@@ -1,0 +1,281 @@
+/**
+ * Premium interaction layer — black / red / white theme.
+ * Subtle motion; respects prefers-reduced-motion.
+ */
+
+/* ── Motion tokens ── */
+:root {
+  --motion-fast: 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-base: 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-expand: 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  --shadow-lift: 0 10px 32px rgba(0, 0, 0, 0.5);
+  --shadow-lift-subtle: 0 6px 20px rgba(0, 0, 0, 0.38);
+  --glow-red: 0 0 0 1px rgba(231, 0, 11, 0.12), 0 8px 28px rgba(231, 0, 11, 0.08);
+  --focus-ring: 0 0 0 2px #000000, 0 0 0 4px rgba(231, 0, 11, 0.65);
+}
+
+/* ── Reusable card lift ── */
+@media (prefers-reduced-motion: no-preference) {
+  .interactive-lift,
+  .dash-card-interactive {
+    transition:
+      transform var(--motion-base),
+      border-color var(--motion-base),
+      box-shadow var(--motion-base),
+      background var(--motion-base);
+  }
+
+  .interactive-lift:hover,
+  .dash-card-interactive:hover {
+    transform: translateY(-2px);
+  }
+
+  .interactive-lift:active,
+  .dash-card-interactive:active {
+    transform: translateY(0);
+  }
+}
+
+.dash-card-interactive:focus-within {
+  border-color: rgba(231, 0, 11, 0.28);
+  box-shadow: var(--glow-red);
+}
+
+/* ── KPI cards ── */
+.kpi-card {
+  transition:
+    border-color var(--motion-base),
+    box-shadow var(--motion-base),
+    transform var(--motion-base),
+    background var(--motion-base) !important;
+}
+
+.kpi-card:hover {
+  border-color: rgba(231, 0, 11, 0.38) !important;
+  box-shadow: var(--shadow-lift), inset 0 0 0 1px rgba(231, 0, 11, 0.08) !important;
+  transform: translateY(-2px);
+}
+
+/* ── Chart / action cards ── */
+.hero-chart-card,
+.action-card,
+.records-header-card {
+  transition:
+    border-color var(--motion-base),
+    box-shadow var(--motion-base),
+    transform var(--motion-base),
+    background var(--motion-base);
+}
+
+.hero-chart-card:hover,
+.action-card:hover {
+  border-color: rgba(231, 0, 11, 0.22);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.48);
+  transform: translateY(-1px);
+}
+
+.records-header-card:hover {
+  border-color: rgba(231, 0, 11, 0.18);
+  box-shadow: var(--shadow-lift-subtle);
+}
+
+/* ── Executive header ── */
+.executive-header {
+  transition: border-color var(--motion-base), box-shadow var(--motion-base);
+}
+
+.executive-header:hover {
+  border-color: rgba(231, 0, 11, 0.18);
+  box-shadow: var(--shadow-lift-subtle);
+}
+
+/* ── Dashboard work-item rows ── */
+.dash-work-item {
+  transition:
+    border-color var(--motion-base),
+    box-shadow var(--motion-base),
+    transform var(--motion-base),
+    background var(--motion-base);
+  cursor: default;
+}
+
+.dash-work-item:hover {
+  border-color: rgba(231, 0, 11, 0.32);
+  box-shadow: var(--shadow-lift-subtle), var(--glow-red);
+  transform: translateY(-1px);
+}
+
+.dash-work-item-expanded {
+  border-color: rgba(231, 0, 11, 0.28) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 3px 0 0 #e7000b;
+}
+
+/* ── Dashboard buttons ── */
+.dash-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition:
+    background var(--motion-fast),
+    border-color var(--motion-fast),
+    color var(--motion-fast),
+    box-shadow var(--motion-fast),
+    transform var(--motion-fast);
+}
+
+.dash-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.dash-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.dash-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.dash-btn-primary,
+.ui-btn-primary,
+.ticket-cta-btn {
+  background: #e7000b;
+  color: #ffffff;
+  border: 1px solid rgba(231, 0, 11, 0.6);
+}
+
+.dash-btn-primary:hover:not(:disabled),
+.ui-btn-primary:hover:not(:disabled),
+.ticket-cta-btn:hover:not(:disabled) {
+  background: #ff1a24;
+  box-shadow: 0 4px 18px rgba(231, 0, 11, 0.35);
+  transform: translateY(-1px);
+}
+
+.dash-btn-primary:active:not(:disabled),
+.ui-btn-primary:active:not(:disabled),
+.ticket-cta-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.dash-btn-secondary {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.dash-btn-secondary:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
+}
+
+.dash-btn-danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.dash-btn-danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: rgba(239, 68, 68, 0.55);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.2);
+  transform: translateY(-1px);
+}
+
+/* ── Urgent list buttons ── */
+.dash-urgent-btn {
+  transition:
+    background var(--motion-fast),
+    border-color var(--motion-fast),
+    box-shadow var(--motion-fast),
+    transform var(--motion-fast);
+}
+
+.dash-urgent-btn:hover {
+  background: rgba(239, 68, 68, 0.14) !important;
+  border-color: rgba(239, 68, 68, 0.42) !important;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15);
+  transform: translateY(-1px);
+}
+
+.dash-urgent-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ── Action list row hover ── */
+.dash-action-row {
+  transition: background var(--motion-fast), padding-left var(--motion-fast);
+  border-radius: 6px;
+  margin: 0 -0.35rem;
+  padding-left: 0.35rem;
+  padding-right: 0.35rem;
+}
+
+.dash-action-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+  padding-left: 0.55rem;
+}
+
+/* ── Solution stats table ── */
+.dash-stats-table-wrap {
+  transition: border-color var(--motion-base), box-shadow var(--motion-base);
+}
+
+.dash-stats-table-wrap:hover {
+  border-color: rgba(231, 0, 11, 0.15);
+  box-shadow: var(--shadow-lift-subtle);
+}
+
+.dash-stats-table tbody tr {
+  transition: background var(--motion-fast);
+}
+
+/* ── Ticket page layout width ── */
+.main-content:has(.ticket-detail-page),
+.main-content:has(.results-detail-page) {
+  max-width: 1140px;
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .kpi-card:hover,
+  .hero-chart-card:hover,
+  .action-card:hover,
+  .interactive-lift:hover,
+  .dash-card-interactive:hover,
+  .dash-work-item:hover,
+  .dash-btn-primary:hover:not(:disabled),
+  .dash-btn-secondary:hover:not(:disabled),
+  .dash-btn-danger:hover:not(:disabled),
+  .dash-urgent-btn:hover,
+  .ticket-cta-btn:hover:not(:disabled) {
+    transform: none;
+  }
+
+  .record-expand-panel,
+  .record-card-toggle,
+  .solution-card,
+  .dash-action-row,
+  .kpi-card,
+  .hero-chart-card,
+  .action-card,
+  .dash-work-item,
+  .dash-btn,
+  .dash-urgent-btn {
+    transition-duration: 0.01ms !important;
+  }
+}

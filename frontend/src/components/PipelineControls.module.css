@@ -1,0 +1,153 @@
+.container {
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.primary {
+  background: #4CAF50;
+  color: white;
+}
+
+.primary:hover:not(:disabled) {
+  background: #45a049;
+}
+
+.danger {
+  background: #F44336;
+  color: white;
+}
+
+.danger:hover:not(:disabled) {
+  background: #da190b;
+}
+
+.secondary {
+  background: #2196F3;
+  color: white;
+}
+
+.secondary:hover:not(:disabled) {
+  background: #0b7dda;
+}
+
+.statusInfo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.statusRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 4px;
+  border-left: 3px solid #2196F3;
+}
+
+.label {
+  font-weight: 500;
+  color: #555;
+}
+
+.value {
+  font-weight: 600;
+  color: #333;
+}
+
+.value.failed {
+  color: #F44336;
+}
+
+.value.cancelled {
+  color: #FF9800;
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status.draft {
+  background: #E0E0E0;
+  color: #666;
+}
+
+.status.ready {
+  background: #FFF9C4;
+  color: #856404;
+}
+
+.status.queued {
+  background: #B3E5FC;
+  color: #01579B;
+}
+
+.status.processing {
+  background: #FFE0B2;
+  color: #E65100;
+}
+
+.status.completed {
+  background: #C8E6C9;
+  color: #1B5E20;
+}
+
+.status.failed {
+  background: #FFCDD2;
+  color: #B71C1C;
+}
+
+.status.cancelled {
+  background: #FFCCBC;
+  color: #BF360C;
+}
+
+.loading {
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  margin-top: 12px;
+}

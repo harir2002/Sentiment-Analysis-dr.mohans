@@ -1,0 +1,81 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+venv/
+ENV/
+env/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Secrets (CRITICAL - never commit secrets)
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p8
+
+# Local development
+data/
+*.db
+*.sqlite
+*.sqlite3
+uploads/
+backend/data/
+
+# Node/Frontend
+node_modules/
+dist/
+build/
+.next/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+.vscode/settings.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# HF Space clone (separate git repo — do not push into main project)
+sentiment_analysis/
+backend/sentiment_analysis/
