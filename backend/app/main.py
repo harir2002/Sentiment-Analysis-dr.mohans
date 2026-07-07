@@ -88,6 +88,22 @@ def create_app() -> FastAPI:
     app.include_router(batch_router)
     app.include_router(excel_router)
     app.include_router(pipeline_router)
+
+    @app.get("/")
+    async def root():
+        return {
+            "service": "Call Analytics Comparison API",
+            "version": "1.0.0",
+            "status": "running",
+            "message": "Backend is live. Open /docs for the interactive API.",
+            "endpoints": {
+                "docs": "/docs",
+                "health": "/health",
+                "live": "/live",
+                "ready": "/ready",
+            },
+        }
+
     return app
 
 
