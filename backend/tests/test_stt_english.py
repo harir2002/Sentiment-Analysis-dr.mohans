@@ -33,3 +33,9 @@ def test_validate_english_transcript_accepts_english():
 
 def test_normalize_english_transcript_collapses_whitespace():
     assert normalize_english_transcript("Hello   world .") == "Hello world."
+
+
+def test_normalize_english_transcript_fixes_death_test_homophone():
+    raw = "Yesterday my mother's death test was taken and reports have come."
+    assert "blood test" in normalize_english_transcript(raw)
+    assert "death test" not in normalize_english_transcript(raw).lower()

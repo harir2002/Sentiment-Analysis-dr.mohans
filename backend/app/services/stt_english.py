@@ -31,6 +31,21 @@ _INDIC_SCRIPTS = frozenset(
     }
 )
 
+# Common Sarvam/Whisper homophone errors in Dr. Mohan's diabetes call-center context.
+# Applied on every STT result (not cached) — safe corrections only.
+_CLINICAL_STT_CORRECTIONS: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"\bdeath tests\b", re.I), "blood tests"),
+    (re.compile(r"\bdeath test\b", re.I), "blood test"),
+)
+
+
+def apply_clinical_stt_corrections(text: str) -> str:
+    """Fix known healthcare STT mis-hearings in English transcripts."""
+    corrected = text or ""
+    for pattern, replacement in _CLINICAL_STT_CORRECTIONS:
+        corrected = pattern.sub(replacement, corrected)
+    return corrected
+
 
 def sarvam_mode_for_english_output(model: str, configured_mode: str) -> str:
     """Use Sarvam translate mode when supported (saaras) to emit English text."""
@@ -78,14 +93,16 @@ def validate_english_transcript(text: str) -> str | None:
 
 
 def normalize_english_transcript(text: str) -> str:
-    """Light cleanup before sentiment analysis."""
+    """Light cleanup and domain STT corrections before sentiment analysis."""
     cleaned = " ".join((text or "").split())
     cleaned = re.sub(r"\s+([,.!?;:])", r"\1", cleaned)
+    cleaned = apply_clinical_stt_corrections(cleaned)
     return cleaned.strip()
 
 
 __all__ = [
     "ENGLISH_TRANSLATION_FAILED",
+    "apply_clinical_stt_corrections",
     "is_predominantly_english",
     "normalize_english_transcript",
     "sanitize_provider_result_for_client",
