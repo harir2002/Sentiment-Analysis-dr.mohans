@@ -33,12 +33,13 @@ def _state_key(audio_path: str, language_code: str | None) -> str:
 
 
 async def get_shared_state(audio_path: str, language_code: str | None = None) -> SarvamSttSharedState:
-    key = cache_key_for_language(language_code)
+    key = _state_key(audio_path, language_code)
+    lang_key = cache_key_for_language(language_code)
     async with _registry_lock:
         if key not in _states:
             _states[key] = SarvamSttSharedState(
                 audio_path=audio_path,
-                language_code=key,
+                language_code=lang_key,
             )
         return _states[key]
 
