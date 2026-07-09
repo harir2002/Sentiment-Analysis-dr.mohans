@@ -4,7 +4,6 @@ import { listCalls, deleteRecording } from '../services/api';
 import ExecutiveDashboardHeader from './ExecutiveDashboardHeader';
 import DashboardKpiRow from './DashboardKpiRow';
 import DashboardSentimentStory from './DashboardSentimentStory';
-import DashboardActionability from './DashboardActionability';
 import { StatusBadge } from './SolutionTab';
 import {
   getCanonicalResult,
@@ -393,7 +392,6 @@ export default function SentimentDashboard({ mode = 'dashboard' }) {
         {mode === 'dashboard' && <ExecutiveDashboardHeader records={[]} lastUpdated={lastUpdated} />}
         {mode === 'dashboard' && <DashboardKpiRow records={[]} />}
         {mode === 'dashboard' && <DashboardSentimentStory records={[]} />}
-        {mode === 'dashboard' && <DashboardActionability records={[]} />}
         <div className={styles['records-section']} ref={recordsListRef}>
           <EmptyState
             icon={mode === 'crm' ? '🗂' : '📊'}
@@ -421,16 +419,6 @@ export default function SentimentDashboard({ mode = 'dashboard' }) {
       {mode === 'dashboard' && <DashboardSummary records={records} />}
 
       {mode === 'dashboard' && <DashboardSentimentStory records={records} />}
-
-      {mode === 'dashboard' && (
-        <DashboardActionability
-          records={records}
-          onOpenTicket={(jobId) => {
-            const rec = records.find((r) => r.job_id === jobId);
-            navigateToTicket(jobId, rec);
-          }}
-        />
-      )}
 
       <div className={styles['records-section']} ref={recordsListRef}>
         <Card className={`${styles['records-header-card']} records-header-card`}>
