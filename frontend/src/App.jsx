@@ -262,7 +262,7 @@ export default function App() {
           }
           subtitle={
             resultsJobId
-              ? 'Full 4-solution comparison for this recording'
+              ? 'Full call analysis for this recording'
               : ticketJobId
                 ? 'CRM-style call detail and recommended actions'
                 : currentPage === 'dashboard'
@@ -277,7 +277,7 @@ export default function App() {
           onToggleTheme={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
           exportSlot={
             !ticketJobId && !resultsJobId && currentPage !== 'dashboard' && currentPage !== 'crm' && canExport ? (
-              <ExportSection jobId={job.job_id} compact />
+              <ExportSection jobId={job.job_id} />
             ) : null
           }
         />
@@ -345,15 +345,12 @@ export default function App() {
               )}
 
               {resultsReady && !showActiveProcessing && (
-                <>
-                  <SolutionComparison
-                    results={results}
-                    ranking={job?.ranking}
-                    audioFilename={job?.audio_filename || activeItem?.filename}
-                    jobMeta={job}
-                  />
-                  {canExport && <ExportSection jobId={job.job_id} />}
-                </>
+                <SolutionComparison
+                  results={results}
+                  ranking={job?.ranking}
+                  audioFilename={job?.audio_filename || activeItem?.filename}
+                  jobMeta={job}
+                />
               )}
             </>
           )}

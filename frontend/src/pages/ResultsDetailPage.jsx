@@ -49,7 +49,7 @@ export default function ResultsDetailPage({ jobId }) {
         <button type="button" className={styles.back} onClick={() => navigateToTicket(jobId, record)}>
           ← Back to Ticket
         </button>
-        {resultsReady && <ExportSection jobId={jobId} compact />}
+        {resultsReady && <ExportSection jobId={jobId} />}
       </div>
 
       <header className={styles.header}>
