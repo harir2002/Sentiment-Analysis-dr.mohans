@@ -19,6 +19,16 @@ def test_build_analysis_prompt_includes_transcript():
     assert "__TRANSCRIPT__" not in prompt
     assert '"notes"' in prompt
     assert "Security and scope rules" in prompt
+    assert "Sentiment analysis rules" in prompt
+
+
+def test_build_sarvam_analysis_prompt_includes_production_sentiment_rules():
+    prompt = build_sarvam_analysis_prompt("Customer said the app is useless and cannot log in.")
+    assert "Judge sentiment from the CUSTOMER/CALLER only" in prompt
+    assert "Do NOT default to neutral" in prompt
+    assert "polite" in prompt.lower() and "thank you" in prompt.lower()
+    assert "app/service quality" in prompt.lower() or "app/service" in prompt.lower()
+    assert "Customer said the app is useless" in prompt
 
 
 def test_build_analysis_prompt_handles_empty_transcript():
