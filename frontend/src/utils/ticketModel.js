@@ -1,4 +1,5 @@
 import { getCanonicalResult, getCanonicalConfidence } from './canonicalResult';
+import { DISPLAY_LABEL } from '../constants/solutions';
 import { getRecordingAssessment } from './callValidity';
 import {
   getCanonicalRecommendation,
@@ -67,7 +68,7 @@ export function buildTicketFromRecord(record, recordingIndex = 0) {
     transcript: canonical?.transcript || null,
     canonicalResult: canonical,
     canonicalSolutionId: record?.final_solution_id || canonical?.solution_id || null,
-    canonicalSolutionLabel: canonical?.label || null,
+    canonicalSolutionLabel: DISPLAY_LABEL,
     overallScore: record?.final_overall_score ?? canonical?.overall_score ?? null,
     results: record?.results || [],
     ranking: record?.ranking || null,

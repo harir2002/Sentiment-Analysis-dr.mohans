@@ -253,7 +253,7 @@ export default function DashboardSentimentStory({ records }) {
       <div className={sectionStyles['section-intro']}>
         <h3 className={sectionStyles['section-heading']}>Sentiment Story</h3>
         <p className={sectionStyles['section-subheading']}>
-          How customers feel across your call portfolio — each point is one canonical result per recording.
+          How customers feel across your call portfolio — one analysed call per recording.
         </p>
       </div>
       <div className={styles['story-charts-grid']}>

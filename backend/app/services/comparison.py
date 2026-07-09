@@ -1,3 +1,4 @@
+"""Run the single active analysis pipeline (Sarvam STT + Sarvam LLM)."""
 import asyncio
 import logging
 
@@ -8,17 +9,8 @@ from app.services.scoring import score_all_results, build_ranking
 
 logger = logging.getLogger(__name__)
 
-# Groq Whisper + LLM pipelines ("open-source" group in the UI)
-OPEN_SOURCE_SOLUTIONS = (
-    SolutionOption.GROQ_SARVAM,
-    SolutionOption.GROQ_GROQ,
-)
-
-# Sarvam STT + LLM pipelines
-SARVAM_SOLUTIONS = (
-    SolutionOption.SARVAM_SARVAM,
-    SolutionOption.SARVAM_GROQ,
-)
+# Only one pipeline is active in production (team simplification).
+ACTIVE_SOLUTIONS = (SolutionOption.SARVAM_SARVAM,)
 
 
 async def _run_solution(
@@ -37,31 +29,19 @@ async def get_all_results(
     audio_path: str,
     language_code: str | None = None,
 ) -> tuple[list[ProviderResult], dict]:
-    """
-    Run all provider pipelines concurrently.
-    Open-source (Groq) and Sarvam tasks start at the same time via create_task.
-    """
-    open_source_tasks = [
+    """Run the active Sarvam pipeline for one recording."""
+    tasks = [
         asyncio.create_task(
             _run_solution(solution, audio_path, language_code),
             name=f"pipeline-{solution.value}",
         )
-        for solution in OPEN_SOURCE_SOLUTIONS
-    ]
-    sarvam_tasks = [
-        asyncio.create_task(
-            _run_solution(solution, audio_path, language_code),
-            name=f"pipeline-{solution.value}",
-        )
-        for solution in SARVAM_SOLUTIONS
+        for solution in ACTIVE_SOLUTIONS
     ]
 
-    all_tasks = open_source_tasks + sarvam_tasks
-    raw_results = await asyncio.gather(*all_tasks, return_exceptions=True)
+    raw_results = await asyncio.gather(*tasks, return_exceptions=True)
 
     results: list[ProviderResult] = []
-    all_solutions = list(OPEN_SOURCE_SOLUTIONS) + list(SARVAM_SOLUTIONS)
-    for solution, item in zip(all_solutions, raw_results):
+    for solution, item in zip(ACTIVE_SOLUTIONS, raw_results):
         if isinstance(item, Exception):
             results.append(make_failed_result(solution, str(item)))
             metrics.record_provider_error(solution.value)
@@ -80,7 +60,6 @@ async def get_all_results(
                     "provider_pipeline_completed",
                     solution_id=item.solution_id,
                     sentiment=item.analysis.sentiment,
-                    confidence=item.analysis.confidence,
                     runtime_seconds=item.total_runtime_seconds,
                 )
 
@@ -98,11 +77,9 @@ async def run_all_comparisons(
 
 
 def build_provider_groups(results: list[ProviderResult]) -> dict[str, list[ProviderResult]]:
-    open_source_ids = {s.value for s in OPEN_SOURCE_SOLUTIONS}
-    sarvam_ids = {s.value for s in SARVAM_SOLUTIONS}
+    active_ids = {s.value for s in ACTIVE_SOLUTIONS}
     return {
-        "open_source": [r for r in results if r.solution_id in open_source_ids],
-        "sarvam": [r for r in results if r.solution_id in sarvam_ids],
+        "sarvam": [r for r in results if r.solution_id in active_ids],
     }
 
 
@@ -141,7 +118,7 @@ async def retry_solutions(
         else:
             by_id[solution.value] = item
 
-    merged = [by_id[s.value] for s in SolutionOption if s.value in by_id]
+    merged = [by_id[s.value] for s in ACTIVE_SOLUTIONS if s.value in by_id]
     scored = score_all_results(merged, audio_path)
     ranking = build_ranking(scored)
     return scored, ranking

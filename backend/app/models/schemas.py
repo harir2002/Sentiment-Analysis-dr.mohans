@@ -40,7 +40,7 @@ class SolutionOption(str, Enum):
 
 
 SOLUTION_LABELS = {
-    SolutionOption.SARVAM_SARVAM: "Sarvam STT + Sarvam LLM",
+    SolutionOption.SARVAM_SARVAM: "Call Analysis",
     SolutionOption.SARVAM_GROQ: "Sarvam STT + Groq Gemma 4 26B A4B",
     SolutionOption.GROQ_SARVAM: "Groq Whisper + Sarvam LLM",
     SolutionOption.GROQ_GROQ: "Groq Whisper + Groq Gemma 4 26B A4B",

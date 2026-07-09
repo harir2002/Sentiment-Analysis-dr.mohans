@@ -54,7 +54,7 @@ export default function ResultsDetailPage({ jobId }) {
 
       <header className={styles.header}>
         <h1 className={styles.title}>Full Analysis Results</h1>
-        <p className={styles.sub}>{record.audio_filename || 'Recording'} · 4-solution comparison</p>
+        <p className={styles.sub}>{record.audio_filename || 'Recording'} · call analysis</p>
       </header>
 
       {resultsReady ? (

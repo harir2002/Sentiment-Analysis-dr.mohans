@@ -6,7 +6,6 @@ import {
   navigateToDashboard,
   navigateToResults,
 } from '../utils/appNavigation';
-import { orderSolutionResults } from '../constants/solutions';
 import { Alert, Badge, SentimentBadge, PriorityBadge, Skeleton } from '../components/ui';
 import styles from './TicketDetailPage.module.css';
 
@@ -76,26 +75,6 @@ function MetaRow({ label, value, children }) {
   );
 }
 
-function SolutionMiniCard({ result, isCanonical }) {
-  const completed = result.status === 'completed' && result.analysis;
-  return (
-    <div className={`${styles['solution-mini']} ${isCanonical ? styles['solution-mini-canonical'] : ''}`}>
-      {isCanonical && <span className={styles['canonical-tag']}>Selected</span>}
-      <h4 className={styles['solution-mini-title']}>{result.label}</h4>
-      <p className={styles['solution-mini-meta']}>
-        {completed
-          ? `${result.analysis.sentiment} · ${Math.round((result.analysis.confidence || 0) * 100)}%`
-          : result.status}
-      </p>
-      <p className={styles['solution-mini-summary']}>
-        {completed
-          ? result.analysis.summary || 'No summary.'
-          : result.error || result.status_message || 'Unavailable'}
-      </p>
-    </div>
-  );
-}
-
 export default function TicketDetailPage({ jobId }) {
   const [record, setRecord] = useState(() => getCachedTicketRecord(jobId));
   const [loading, setLoading] = useState(!record);
@@ -152,7 +131,6 @@ export default function TicketDetailPage({ jobId }) {
   }
 
   const ticket = buildTicketFromRecord(record, recordingIndex);
-  const orderedSolutions = ticket.resultsReady ? orderSolutionResults(ticket.results) : [];
   const hasAudio = Boolean(ticket.audioUrl);
 
   return (
@@ -230,9 +208,6 @@ export default function TicketDetailPage({ jobId }) {
           {ticket.needsReview && !workflow.resolved && (
             <Badge variant="danger">Needs Review</Badge>
           )}
-          {ticket.confidencePercent != null && ticket.isValidCall && (
-            <span className={styles['confidence-pill']}>{ticket.confidencePercent}% confidence</span>
-          )}
         </div>
       </header>
 
@@ -309,24 +284,6 @@ export default function TicketDetailPage({ jobId }) {
                 <span className={styles['decision-label']}>Sentiment</span>
                 <SentimentBadge sentiment={ticket.sentiment} />
               </div>
-              {ticket.confidencePercent != null && ticket.isValidCall && (
-                <div className={styles['decision-row']}>
-                  <span className={styles['decision-label']}>Confidence</span>
-                  <span className={styles['decision-value']}>{ticket.confidencePercent}%</span>
-                </div>
-              )}
-              {ticket.resolutionStatus && (
-                <div className={styles['decision-row']}>
-                  <span className={styles['decision-label']}>Resolution</span>
-                  <span className={styles['decision-value']}>{ticket.resolutionStatus}</span>
-                </div>
-              )}
-              {ticket.escalationStatus && (
-                <div className={styles['decision-row']}>
-                  <span className={styles['decision-label']}>Escalation</span>
-                  <span className={styles['decision-value']}>{ticket.escalationStatus}</span>
-                </div>
-              )}
             </div>
             {ticket.recommendation && (
               <div className={styles['next-action-box']}>
@@ -383,50 +340,16 @@ export default function TicketDetailPage({ jobId }) {
             <MetaRow label="Ingested" value={formatDateTime(ticket.ingestedAt || ticket.createdAt)} />
           </SectionCard>
 
-          <SectionCard title="Analysis Details" subtitle="Canonical pipeline selection">
-            <MetaRow label="Selected solution" value={ticket.canonicalSolutionLabel} />
-            {ticket.overallScore != null && (
-              <MetaRow label="Overall score" value={ticket.overallScore.toFixed(2)} />
-            )}
-            {ticket.sttModel && <MetaRow label="STT model" value={ticket.sttModel} />}
-            {ticket.llmModel && <MetaRow label="LLM model" value={ticket.llmModel} />}
-            {ticket.winnerReason && (
-              <div className={styles['winner-reason']}>
-                <span className={styles['meta-label']}>Why selected</span>
-                <p>{ticket.winnerReason}</p>
-              </div>
-            )}
-            <button
-              type="button"
-              className={styles['btn-secondary-full']}
-              onClick={() => navigateToResults(jobId, record)}
-            >
-              Open full results comparison →
-            </button>
+          <SectionCard title="Analysis Details" subtitle="Processing context">
+            <MetaRow label="Analysis type" value="Call Analysis" />
+            <MetaRow label="Processing time">
+              {ticket.totalRuntimeSeconds != null ? `${ticket.totalRuntimeSeconds.toFixed(1)}s` : '—'}
+            </MetaRow>
+            <MetaRow label="Language" value={ticket.sttLanguage} />
+            <MetaRow label="Ingested" value={formatDateTime(ticket.ingestedAt || ticket.createdAt)} />
           </SectionCard>
         </aside>
       </div>
-
-      {/* ——— Supplementary 4-solution comparison ——— */}
-      {orderedSolutions.length > 0 && (
-        <section className={styles.comparison} id="solutions">
-          <div className={styles['comparison-head']}>
-            <h2 className={styles['comparison-title']}>4-Solution Comparison</h2>
-            <p className={styles['comparison-sub']}>
-              Supplementary pipeline outputs — dashboard metrics use the selected canonical result only.
-            </p>
-          </div>
-          <div className={styles['solution-grid']}>
-            {orderedSolutions.map((result) => (
-              <SolutionMiniCard
-                key={result.solution_id}
-                result={result}
-                isCanonical={result.solution_id === ticket.canonicalSolutionId}
-              />
-            ))}
-          </div>
-        </section>
-      )}
     </div>
   );
 }

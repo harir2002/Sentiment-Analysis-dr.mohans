@@ -5,12 +5,9 @@ import ExecutiveDashboardHeader from './ExecutiveDashboardHeader';
 import DashboardKpiRow from './DashboardKpiRow';
 import DashboardSentimentStory from './DashboardSentimentStory';
 import DashboardActionability from './DashboardActionability';
-import DashboardSolutionStory from './DashboardSolutionStory';
 import { StatusBadge } from './SolutionTab';
-import { orderSolutionResults } from '../constants/solutions';
 import {
   getCanonicalResult,
-  getCanonicalConfidence,
 } from '../utils/canonicalResult';
 import {
   getDisplaySentiment,
@@ -35,8 +32,6 @@ function confirmDelete(filename) {
 }
 
 // DashboardSummary component - top-level metrics.
-// KPIs count each recording exactly once via its canonical result;
-// the 4 per-solution outputs never feed these numbers.
 function DashboardSummary({ records }) {
   return (
     <div className={styles['dashboard-summary']}>
@@ -45,53 +40,41 @@ function DashboardSummary({ records }) {
   );
 }
 
-// Compact per-solution card shown inside an expanded recording
-function RecordSolutionCard({ result, isCanonical }) {
-  const completed = result.status === 'completed' && result.analysis;
-  const confidencePct = completed ? Math.round((result.analysis.confidence || 0) * 100) : null;
+// Compact result summary inside an expanded recording
+function RecordResultSummary({ result }) {
+  const completed = result?.status === 'completed' && result?.analysis;
+
+  if (!result) {
+    return <p className={styles['results-muted']}>No analysis result available.</p>;
+  }
+
+  if (!completed) {
+    return (
+      <p className={styles['solution-card-summary']}>
+        {result.error || result.status_message || 'Awaiting analysis.'}
+      </p>
+    );
+  }
 
   return (
-    <div
-      className={`${styles['solution-card']} ${isCanonical ? styles['solution-card-canonical'] : ''}`}
-    >
-      <div className={styles['solution-card-header']}>
-        <h6 className={styles['solution-card-title']}>{result.label}</h6>
-        {isCanonical && <span className={styles['solution-card-badge']}>Final result</span>}
-      </div>
-
+    <>
       <div className={styles['solution-card-fields']}>
-        <ResultField label="Status" value={<StatusBadge status={result.status} />} />
         <ResultField
           label="Sentiment"
-          value={completed ? <SentimentBadge sentiment={result.analysis.sentiment} /> : '—'}
+          value={<SentimentBadge sentiment={result.analysis.sentiment} />}
         />
-        <ResultField label="Confidence" value={confidencePct != null ? `${confidencePct}%` : '—'} />
-        <ResultField
-          label="Score"
-          value={result.overall_score != null ? result.overall_score.toFixed(2) : '—'}
-        />
+        <ResultField label="Status" value={<StatusBadge status={result.status} />} />
       </div>
-
       <p className={styles['solution-card-summary']}>
-        {completed
-          ? result.analysis.summary || 'No summary available.'
-          : result.error || result.status_message || 'Awaiting or unavailable.'}
+        {result.analysis.summary || 'No summary available.'}
       </p>
-
-      {completed && result.analysis.recommended_action && (
+      {result.analysis.recommended_action && (
         <div className={styles['solution-card-action']}>
           <span className={styles['solution-card-action-label']}>Next Step</span>
           <p className={styles['solution-card-action-text']}>{result.analysis.recommended_action}</p>
         </div>
       )}
-
-      {completed && result.transcript && (
-        <details className={styles['solution-card-transcript']}>
-          <summary>Transcript ({result.stt_model || result.stt_provider})</summary>
-          <p>{result.transcript}</p>
-        </details>
-      )}
-    </div>
+    </>
   );
 }
 
@@ -108,15 +91,12 @@ function ExpandableRecordCard({ record, index, onToggleExpand, expanded, onRemov
 
   const sentiment = getDisplaySentiment(record);
   const isInvalid = !assessment.isValidCall || assessment.sentimentLabel === 'invalid';
-  const confidenceFraction = getCanonicalConfidence(record);
-  const confidence = confidenceFraction != null ? Math.round(confidenceFraction * 100) : null;
   const recommendation = getCanonicalRecommendation(record);
   const previewText = getRecordPreviewText(record);
   const recommendationSnippet = getRecommendationSnippet(record, 72);
   const summary = analysis?.summary || 'No summary available.';
   const transcript = canonicalResult?.transcript || 'Transcript not available.';
   const status = record.aggregate_status || record.status || 'unknown';
-  const orderedSolutions = hasResults ? orderSolutionResults(record.results) : [];
 
   // Format date
   const createdDate = new Date(record.created_at);
@@ -180,11 +160,6 @@ function ExpandableRecordCard({ record, index, onToggleExpand, expanded, onRemov
         <div className={styles['record-card-header-right']}>
           {resultsReady && (
             <SentimentBadge sentiment={sentiment} />
-          )}
-          {confidence != null && !isInvalid && (
-            <div className={styles['record-card-confidence']}>
-              <span className={styles['confidence-value']}>{confidence}%</span>
-            </div>
           )}
           <Badge variant={statusVariant} className={styles['record-card-status']}>
             {statusLabel}
@@ -281,11 +256,9 @@ function ExpandableRecordCard({ record, index, onToggleExpand, expanded, onRemov
                 </div>
               </div>
 
-              {/* Canonical final result section */}
+              {/* Analysis result */}
               <div className={styles['record-expanded-section']}>
-                <h5 className={styles['section-title']}>
-                  Final Result{canonicalResult ? ` — ${canonicalResult.label}` : ''}
-                </h5>
+                <h5 className={styles['section-title']}>Call Analysis</h5>
 
                 {isInvalid && assessment.invalidReason && (
                   <Alert variant="info" title="Unclassified Call">
@@ -293,41 +266,15 @@ function ExpandableRecordCard({ record, index, onToggleExpand, expanded, onRemov
                   </Alert>
                 )}
 
-                <div className={styles['sentiment-analysis-grid']}>
-                  <div className={styles['analysis-item']}>
-                    <span className={styles['analysis-label']}>Sentiment</span>
-                    <div className={styles['analysis-value']}>
-                      <SentimentBadge sentiment={sentiment} />
-                    </div>
-                  </div>
-                  <div className={styles['analysis-item']}>
-                    <span className={styles['analysis-label']}>Confidence Score</span>
-                    <div className={styles['analysis-value']}>
-                      <span className={styles['confidence-score']}>{confidence != null ? `${confidence}%` : '—'}</span>
-                    </div>
-                  </div>
-                  {canonicalResult?.overall_score != null && (
-                    <div className={styles['analysis-item']}>
-                      <span className={styles['analysis-label']}>Overall Score</span>
-                      <div className={styles['analysis-value']}>
-                        <span className={styles['score']}>{canonicalResult.overall_score.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <RecordResultSummary result={canonicalResult} />
               </div>
 
-              {/* Next Step / Recommendation */}
+              {/* Next Step */}
               {recommendation && (
                 <div className={styles['record-expanded-section']}>
-                  <h5 className={styles['section-title']}>Next Step</h5>
+                  <h5 className={styles['section-title']}>Next Steps</h5>
                   <div className={styles['action-box']}>
                     <p className={styles['action-text']}>{recommendation}</p>
-                    {analysis?.action_priority && (
-                      <Badge variant="warning" className={styles['priority-badge']}>
-                        {analysis.action_priority} Priority
-                      </Badge>
-                    )}
                   </div>
                 </div>
               )}
@@ -338,82 +285,11 @@ function ExpandableRecordCard({ record, index, onToggleExpand, expanded, onRemov
                 <p className={styles['record-summary-text']}>{summary}</p>
               </div>
 
-              {/* Key Issues section */}
-              {analysis?.key_issues && analysis.key_issues.length > 0 && (
-                <div className={styles['record-expanded-section']}>
-                  <h5 className={styles['section-title']}>Key Issues</h5>
-                  <ul className={styles['issues-list']}>
-                    {analysis.key_issues.map((issue, i) => (
-                      <li key={i}>{issue}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Recommended Actions section (legacy action_items) */}
-              {analysis?.recommended_action && analysis.recommended_action !== recommendation && (
-                <div className={styles['record-expanded-section']}>
-                  <h5 className={styles['section-title']}>Recommended Action</h5>
-                  <div className={styles['action-box']}>
-                    <p className={styles['action-text']}>{analysis.recommended_action}</p>
-                    {analysis?.action_priority && (
-                      <Badge variant="warning" className={styles['priority-badge']}>
-                        {analysis.action_priority} Priority
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Solution Details section (canonical pipeline) */}
+              {/* Transcript */}
               <div className={styles['record-expanded-section']}>
-                <h5 className={styles['section-title']}>Final Solution Details</h5>
-                <div className={styles['solution-details']}>
-                  <div className={styles['solution-item']}>
-                    <span className={styles['solution-label']}>STT Model</span>
-                    <span className={styles['solution-value']}>{canonicalResult?.stt_model || '—'}</span>
-                  </div>
-                  <div className={styles['solution-item']}>
-                    <span className={styles['solution-label']}>LLM Model</span>
-                    <span className={styles['solution-value']}>{canonicalResult?.llm_model || '—'}</span>
-                  </div>
-                  <div className={styles['solution-item']}>
-                    <span className={styles['solution-label']}>STT Time</span>
-                    <span className={styles['solution-value']}>
-                      {canonicalResult?.stt_runtime_seconds ? canonicalResult.stt_runtime_seconds.toFixed(1) : '—'}s
-                    </span>
-                  </div>
-                  <div className={styles['solution-item']}>
-                    <span className={styles['solution-label']}>LLM Time</span>
-                    <span className={styles['solution-value']}>
-                      {canonicalResult?.llm_runtime_seconds ? canonicalResult.llm_runtime_seconds.toFixed(1) : '—'}s
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Transcript section (canonical pipeline) */}
-              <div className={styles['record-expanded-section']}>
-                <h5 className={styles['section-title']}>Full Transcript</h5>
+                <h5 className={styles['section-title']}>Transcript</h5>
                 <div className={styles['transcript-box']}>
                   <p className={styles['transcript-text']}>{transcript}</p>
-                </div>
-              </div>
-
-              {/* All 4 solution outputs */}
-              <div className={styles['record-expanded-section']}>
-                <h5 className={styles['section-title']}>All Solution Outputs (4 Options)</h5>
-                <p className={styles['solution-grid-hint']}>
-                  Comparison data only — dashboard totals count this recording once, using the final result above.
-                </p>
-                <div className={styles['solution-cards-grid']}>
-                  {orderedSolutions.map((result) => (
-                    <RecordSolutionCard
-                      key={result.solution_id}
-                      result={result}
-                      isCanonical={result.solution_id === canonicalResult?.solution_id}
-                    />
-                  ))}
                 </div>
               </div>
             </>
@@ -555,8 +431,6 @@ export default function SentimentDashboard({ mode = 'dashboard' }) {
           }}
         />
       )}
-
-      {mode === 'dashboard' && <DashboardSolutionStory records={records} />}
 
       <div className={styles['records-section']} ref={recordsListRef}>
         <Card className={`${styles['records-header-card']} records-header-card`}>

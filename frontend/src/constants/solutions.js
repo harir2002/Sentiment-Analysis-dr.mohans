@@ -1,36 +1,34 @@
-/** Canonical order for all four STT + LLM pipelines. */
+/** Single active pipeline — Sarvam STT + Sarvam LLM (shown as "Call Analysis" in UI). */
 export const SOLUTION_ORDER = [
   {
     id: 'sarvam_stt_sarvam_llm',
-    label: 'Sarvam STT + Sarvam LLM',
-  },
-  {
-    id: 'sarvam_stt_groq_gemma',
-    label: 'Sarvam STT + Groq Gemma 4 26B A4B',
-  },
-  {
-    id: 'groq_whisper_sarvam_llm',
-    label: 'Groq Whisper + Sarvam LLM',
-  },
-  {
-    id: 'groq_whisper_groq_gemma',
-    label: 'Groq Whisper + Groq Gemma 4 26B A4B',
+    label: 'Call Analysis',
   },
 ];
 
+export const DISPLAY_LABEL = 'Call Analysis';
+
 export function orderSolutionResults(results = []) {
   const byId = Object.fromEntries((results || []).map((r) => [r.solution_id, r]));
-  return SOLUTION_ORDER.map(({ id, label }) => (
-    byId[id] || {
+  return SOLUTION_ORDER.map(({ id, label }) => {
+    const existing = byId[id];
+    if (existing) {
+      return { ...existing, label: DISPLAY_LABEL };
+    }
+    return {
       solution_id: id,
-      label,
+      label: DISPLAY_LABEL,
       status: 'pending',
       transcript: '',
-      error: 'No result available for this pipeline',
+      error: 'No result available',
       analysis: null,
-      overall_score: 0,
-      stt_model: '—',
-      llm_model: '—',
-    }
-  ));
+    };
+  });
+}
+
+export function getPrimaryResult(results = [], ranking = null) {
+  const ordered = orderSolutionResults(results);
+  const completed = ordered.find((r) => r.status === 'completed' && r.analysis);
+  if (completed) return completed;
+  return ordered[0] || null;
 }

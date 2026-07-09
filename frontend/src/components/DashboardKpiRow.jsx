@@ -22,7 +22,7 @@ export default function DashboardKpiRow({ records }) {
       <div className={styles['section-intro']}>
         <h3 className={styles['section-heading']}>Executive Summary</h3>
         <p className={styles['section-subheading']}>
-          One canonical result per call — the four AI pipelines never double-count here.
+          Simple overview of analysed calls — one result per recording.
         </p>
       </div>
       <div className={styles['kpi-row']}>
@@ -58,12 +58,6 @@ export default function DashboardKpiRow({ records }) {
         />
       </div>
       <div className={styles['kpi-row']}>
-        <KpiCard
-          label="Avg Confidence"
-          value={kpis.avgConfidence}
-          suffix="%"
-          insight="Valid classified calls only"
-        />
         <KpiCard
           label="Urgent Action"
           value={kpis.urgentAction}
