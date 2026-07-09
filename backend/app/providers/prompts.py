@@ -49,6 +49,7 @@ Strict rules:
 - confidence is a number from 0.0 to 1.0 based on transcript clarity.
 - notes may be an empty string if nothing notable.
 - Common STT errors: "death test" in lab/report context usually means "blood test".
+- Common STT errors: "Director Specialty Center" usually means "Dr. Mohan's Diabetes Specialities Centre".
 """ + _GUARDRAIL_RULES + """
 __TRANSCRIPT__
 """
@@ -88,6 +89,7 @@ Strict rules:
 - notes may be an empty string.
 - Keep summary, issues, and actions concise to fit within token limits.
 - Common STT errors: "death test" in lab/report context usually means "blood test".
+- Common STT errors: "Director Specialty Center" usually means "Dr. Mohan's Diabetes Specialities Centre".
 """ + _GUARDRAIL_RULES + """
 __TRANSCRIPT__
 """

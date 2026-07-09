@@ -33,9 +33,21 @@ _INDIC_SCRIPTS = frozenset(
 
 # Common Sarvam/Whisper homophone errors in Dr. Mohan's diabetes call-center context.
 # Applied on every STT result (not cached) — safe corrections only.
+_ORG_NAME = "Dr. Mohan's Diabetes Specialities Centre"
 _CLINICAL_STT_CORRECTIONS: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"\bdeath tests\b", re.I), "blood tests"),
     (re.compile(r"\bdeath test\b", re.I), "blood test"),
+    (
+        re.compile(
+            r"\bMohan(?:'?s)?\s+Director\s+Special(?:ty|ities|ity)\s+Cent(?:er|re)\b",
+            re.I,
+        ),
+        _ORG_NAME,
+    ),
+    (
+        re.compile(r"\bDirector\s+Special(?:ty|ities|ity)\s+Cent(?:er|re)\b", re.I),
+        _ORG_NAME,
+    ),
 )
 
 

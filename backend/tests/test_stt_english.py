@@ -39,3 +39,14 @@ def test_normalize_english_transcript_fixes_death_test_homophone():
     raw = "Yesterday my mother's death test was taken and reports have come."
     assert "blood test" in normalize_english_transcript(raw)
     assert "death test" not in normalize_english_transcript(raw).lower()
+
+
+def test_normalize_english_transcript_fixes_director_specialty_center_mishearing():
+    raw = (
+        "Good evening sir, Namaste. We are calling from Mohan Director Specialty Center "
+        "regarding the mobile number. It is Mohan's Diabetic center, not Director speciality center."
+    )
+    corrected = normalize_english_transcript(raw)
+    assert "Mohan Director Specialty Center" not in corrected
+    assert "Director speciality center" not in corrected.lower()
+    assert corrected.count("Dr. Mohan's Diabetes Specialities Centre") >= 2
