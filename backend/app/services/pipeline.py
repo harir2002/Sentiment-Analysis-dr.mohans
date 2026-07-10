@@ -8,6 +8,7 @@ from app.models.schemas import (
     AnalysisResult,
 )
 from app.services.recommended_action import enrich_analysis
+from app.services.sentiment_refinement import refine_sentiment
 from app.providers.registry import (
     get_stt_provider,
     get_llm_provider,
@@ -169,14 +170,17 @@ def _apply_llm_result(result: ProviderResult, llm_result) -> ProviderResult:
         return result
 
     result.analysis = enrich_analysis(
-        AnalysisResult(
-            sentiment=llm_result.sentiment,
-            key_issues=llm_result.key_issues,
-            summary=llm_result.summary,
-            action_items=llm_result.action_items,
-            resolution_status=llm_result.resolution_status,
-            confidence=llm_result.confidence,
-            notes=llm_result.notes,
+        refine_sentiment(
+            AnalysisResult(
+                sentiment=llm_result.sentiment,
+                key_issues=llm_result.key_issues,
+                summary=llm_result.summary,
+                action_items=llm_result.action_items,
+                resolution_status=llm_result.resolution_status,
+                confidence=llm_result.confidence,
+                notes=llm_result.notes,
+            ),
+            result.transcript or "",
         )
     )
     result.status = "completed"
