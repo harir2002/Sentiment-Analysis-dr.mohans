@@ -57,29 +57,6 @@ export default function DashboardKpiRow({ records }) {
           variant="invalid"
         />
       </div>
-      <div className={styles['kpi-row']}>
-        <KpiCard
-          label="Urgent Action"
-          value={kpis.urgentAction}
-          insight="Negative or escalated calls"
-          variant="negative"
-        />
-        <KpiCard
-          label="Recent (24h)"
-          value={kpis.recentCount}
-          insight="New uploads today"
-        />
-        <KpiCard
-          label="Completed"
-          value={kpis.completed}
-          insight="Fully analysed recordings"
-        />
-        <KpiCard
-          label="In Progress"
-          value={kpis.processing}
-          insight="Awaiting final results"
-        />
-      </div>
     </section>
   );
 }
