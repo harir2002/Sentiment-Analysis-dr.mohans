@@ -68,3 +68,17 @@ def test_normalize_english_transcript_fixes_mumbai_to_munnadi():
     corrected = normalize_english_transcript(raw)
     assert "come munnadi" in corrected.lower()
     assert "from mumbai" not in corrected.lower()
+
+
+def test_normalize_english_transcript_fixes_conference_center_east_tambaram():
+    raw = "Please visit the Conference center-East Tambaram for the blood test."
+    corrected = normalize_english_transcript(raw)
+    assert "East Tambaram" in corrected
+    assert "Conference center" not in corrected
+
+
+def test_normalize_english_transcript_fixes_rignesh_to_vignesh():
+    raw = "The caller Rignesh asked about the home visit tomorrow."
+    corrected = normalize_english_transcript(raw)
+    assert "Vignesh" in corrected
+    assert "Rignesh" not in corrected

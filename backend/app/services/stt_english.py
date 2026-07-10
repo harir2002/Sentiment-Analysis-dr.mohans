@@ -54,6 +54,16 @@ _CLINICAL_STT_CORRECTIONS: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"\bAdam\s+Baba\b", re.I), "Adambakkam"),
     # Tamil "munnadi" (earlier/before) often misheard as "Mumbai" in scheduling context.
     (re.compile(r"\b(will )?come from Mumbai\b", re.I), r"\1come munnadi"),
+    # East Tambaram branch/area — "Conference center" is a common STT garble.
+    (
+        re.compile(
+            r"\bConference\s+cent(?:er|re)\s*[-–,]?\s*East\s+Tambaram\b",
+            re.I,
+        ),
+        "East Tambaram",
+    ),
+    (re.compile(r"\bConference\s+cent(?:er|re)\s+in\s+East\s+Tambaram\b", re.I), "East Tambaram"),
+    (re.compile(r"\bRignesh\b", re.I), "Vignesh"),
 )
 
 

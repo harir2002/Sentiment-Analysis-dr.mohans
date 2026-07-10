@@ -34,6 +34,8 @@ Known STT corrections (Dr. Mohan's Diabetes Specialities Centre):
 - "home tour" or "home tore" in visit context usually means "home visit" or "home care visit".
 - "Adam Baba area" or "Adam Baba" usually means the Chennai locality "Adambakkam area" or "Adambakkam".
 - "come from Mumbai" or "will come from Mumbai" in home-visit or blood-test scheduling usually means Tamil "munnadi" (earlier/before), not the city Mumbai.
+- "Conference center-East Tambaram" or "Conference centre, East Tambaram" usually means the East Tambaram branch/area (Chennai), not a conference facility.
+- "Rignesh" is usually the patient or caller name "Vignesh".
 """
 
 _MOHANS_CALL_CONTEXT = """
