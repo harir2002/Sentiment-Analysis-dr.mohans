@@ -82,3 +82,10 @@ def test_normalize_english_transcript_fixes_rignesh_to_vignesh():
     corrected = normalize_english_transcript(raw)
     assert "Vignesh" in corrected
     assert "Rignesh" not in corrected
+
+
+def test_normalize_english_transcript_fixes_dr_munda_to_mohans():
+    raw = "We are calling from Dr. Munda regarding the blood test report."
+    corrected = normalize_english_transcript(raw)
+    assert "Dr. Mohan's Diabetes Specialities Centre" in corrected
+    assert "Munda" not in corrected

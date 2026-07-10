@@ -48,6 +48,8 @@ _CLINICAL_STT_CORRECTIONS: tuple[tuple[re.Pattern[str], str], ...] = (
         re.compile(r"\bDirector(?:ate)?\s+Special(?:ty|ities|ity)\s+Cent(?:er|re)\b", re.I),
         _ORG_NAME,
     ),
+    (re.compile(r"\bDr\.?\s*Munda\b", re.I), _ORG_NAME),
+    (re.compile(r"\bDoctor\s+Munda\b", re.I), _ORG_NAME),
     (re.compile(r"\bhome tours?\b", re.I), "home visit"),
     (re.compile(r"\bhome tores?\b", re.I), "home visit"),
     (re.compile(r"\bAdam\s+Baba\s+area\b", re.I), "Adambakkam area"),

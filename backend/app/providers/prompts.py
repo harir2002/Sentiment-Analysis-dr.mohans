@@ -31,6 +31,7 @@ Known STT corrections (Dr. Mohan's Diabetes Specialities Centre):
 - Listen for every detail in the transcript; STT should capture each utterance but may garble names, places, or Tamil-English phrases.
 - "death test" in lab/report context usually means "blood test".
 - "Director Specialty Center", "Directorate Specialty Center", or similar usually means "Dr. Mohan's Diabetes Specialities Centre".
+- "Dr. Munda" or "Doctor Munda" usually means "Dr. Mohan's Diabetes Specialities Centre".
 - "home tour" or "home tore" in visit context usually means "home visit" or "home care visit".
 - "Adam Baba area" or "Adam Baba" usually means the Chennai locality "Adambakkam area" or "Adambakkam".
 - "come from Mumbai" or "will come from Mumbai" in home-visit or blood-test scheduling usually means Tamil "munnadi" (earlier/before), not the city Mumbai.
