@@ -96,3 +96,12 @@ def test_normalize_english_transcript_fixes_mohan_eye_to_diabetes():
     corrected = normalize_english_transcript(raw)
     assert "Dr. Mohan's Diabetes Specialities Centre" in corrected
     assert "Eye" not in corrected
+
+
+def test_normalize_english_transcript_fixes_299_to_2999():
+    raw = "Number 299 sir. The service charge is Rs 299 for the home visit."
+    corrected = normalize_english_transcript(raw)
+    assert "Number 2999" in corrected
+    assert "Rs 2999" in corrected
+    assert "Number 299 " not in corrected + " "
+    assert "Rs 299 " not in corrected + " "

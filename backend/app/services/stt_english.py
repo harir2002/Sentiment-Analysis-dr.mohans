@@ -82,6 +82,34 @@ _CLINICAL_STT_CORRECTIONS: tuple[tuple[re.Pattern[str], str], ...] = (
     ),
     (re.compile(r"\bConference\s+cent(?:er|re)\s+in\s+East\s+Tambaram\b", re.I), "East Tambaram"),
     (re.compile(r"\bRignesh\b", re.I), "Vignesh"),
+    # Trailing digit often dropped: patient/reg number or fee "299" → "2999".
+    (
+        re.compile(
+            r"\b((?:number|id|uhid|mrn|reg(?:istration)?(?:\s+number)?|"
+            r"patient\s+(?:id|number)|file\s+number)\s*[:#]?\s*)299\b",
+            re.I,
+        ),
+        r"\g<1>2999",
+    ),
+    (
+        re.compile(
+            r"\b((?:rs\.?|inr|rupees?)\s*)299\b",
+            re.I,
+        ),
+        r"\g<1>2999",
+    ),
+    (
+        re.compile(r"\b299(\s*(?:rs\.?|rupees?))\b", re.I),
+        r"2999\1",
+    ),
+    (
+        re.compile(
+            r"\b((?:charge|charges|fee|amount|cost|payment|service\s+charge)"
+            r"\s+(?:of\s+|is\s+|are\s+)?(?:rs\.?\s*)?)299\b",
+            re.I,
+        ),
+        r"\g<1>2999",
+    ),
 )
 
 

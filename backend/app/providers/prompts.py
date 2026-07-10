@@ -38,6 +38,7 @@ Known STT corrections (Dr. Mohan's Diabetes Specialities Centre):
 - "come from Mumbai" or "will come from Mumbai" in home-visit or blood-test scheduling usually means Tamil "munnadi" (earlier/before), not the city Mumbai.
 - "Conference center-East Tambaram" or "Conference centre, East Tambaram" usually means the East Tambaram branch/area (Chennai), not a conference facility.
 - "Rignesh" is usually the patient or caller name "Vignesh".
+- "Number 299", "Rs 299", or a service charge of "299" in home-care/billing context usually means "2999" (trailing digit dropped by STT).
 """
 
 _MOHANS_CALL_CONTEXT = """
