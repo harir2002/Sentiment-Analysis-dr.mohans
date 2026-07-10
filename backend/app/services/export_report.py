@@ -390,7 +390,7 @@ def _build_comparison_row(result: ProviderResult) -> ComparisonRow:
 
         issues = "; ".join(result.analysis.key_issues) if result.analysis.key_issues else "—"
 
-        analysis = enrich_analysis(result.analysis)
+        analysis = enrich_analysis(result.analysis, transcript=result.transcript or "")
 
         return ComparisonRow(
 
@@ -504,7 +504,7 @@ def _build_observation(result: ProviderResult) -> SolutionObservation:
 
     if result.status == "completed":
 
-        analysis = enrich_analysis(result.analysis)
+        analysis = enrich_analysis(result.analysis, transcript=result.transcript or "")
 
         return SolutionObservation(
 

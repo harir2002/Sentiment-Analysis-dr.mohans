@@ -1,19 +1,7 @@
 import TranscriptPanel from './TranscriptPanel';
 import { Card, CardHeader, Alert, SentimentBadge } from './ui';
 import { getPrimaryResult } from '../constants/solutions';
-
-function nextStepsFromAnalysis(analysis) {
-  if (!analysis) return [];
-  const steps = [];
-  if (analysis.recommended_action?.trim()) {
-    steps.push(analysis.recommended_action.trim());
-  }
-  (analysis.action_items || []).forEach((item) => {
-    const text = String(item || '').trim();
-    if (text && !steps.includes(text)) steps.push(text);
-  });
-  return steps;
-}
+import { getNextStepsFromAnalysis } from '../utils/nextSteps';
 
 export default function SolutionComparison({ results, ranking, audioFilename, jobMeta }) {
   const result = getPrimaryResult(results, ranking);
@@ -48,7 +36,7 @@ export default function SolutionComparison({ results, ranking, audioFilename, jo
   if (!completed) return null;
 
   const { analysis, transcript } = result;
-  const nextSteps = nextStepsFromAnalysis(analysis);
+  const nextSteps = getNextStepsFromAnalysis(analysis);
 
   return (
     <div className="comparison-layout simple-results-layout">

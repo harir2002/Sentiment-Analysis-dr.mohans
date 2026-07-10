@@ -5,6 +5,7 @@ import {
   getCanonicalRecommendation,
   getDisplaySentiment,
 } from './recordingDisplay';
+import { getNextStepsFromAnalysis } from './nextSteps';
 import { isUrgentAction } from './dashboardAnalytics';
 
 function formatTicketId(jobId) {
@@ -56,6 +57,7 @@ export function buildTicketFromRecord(record, recordingIndex = 0) {
     isValidCall: assessment.isValidCall,
     invalidReason: assessment.invalidReason,
     recommendation: getCanonicalRecommendation(record),
+    nextSteps: getNextStepsFromAnalysis(analysis),
     summary: analysis.summary || null,
     keyIssues: analysis.key_issues || [],
     actionItems: analysis.action_items || [],

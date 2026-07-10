@@ -92,7 +92,10 @@ Strict rules:
 - Output MUST be valid JSON only.
 - sentiment must reflect the customer's overall emotional experience using the sentiment rules below.
 - key_issues must list concrete problems raised.
-- action_items must be specific and actionable.
+- action_items must be specific and actionable for Dr. Mohan's operations.
+- Home visit or appointment booked → send confirmation SMS/WhatsApp with date, time, and service type.
+- Lab report pending → follow up with lab and notify patient when ready.
+- App issue → route to App Support; do not use generic complaint tickets unless the caller is escalating.
 - resolution_status reflects whether the customer's need was met.
 - confidence is a number from 0.0 to 1.0 based on transcript clarity and sentiment certainty.
 - notes may be an empty string if nothing notable.
@@ -139,6 +142,11 @@ Operational rules:
 - Keep summary, issues, and actions concise to fit within token limits.
 - issues: every patient-facing problem (report delay, app failure, appointment issue, home visit problem).
 - actions: concrete next steps for Dr. Mohan's teams (Lab, Home Care, App Support, Branch Ops, Callback desk).
+- Match actions to what happened on the call — do NOT default to complaint tickets.
+- Home visit, blood test, or hemoglobin injection booked → send confirmation SMS/WhatsApp with date, time, and patient name.
+- Lab or outstation report delay → follow up with lab/Chennai branch and call patient with timeline.
+- App login or digital report issue → route to App Support and call back when fixed.
+- Use complaint ticket / service recovery only for genuine unresolved complaints or escalation.
 - resolution_status: resolved = primary need fully addressed; partially_resolved = progress but follow-up required; unresolved = need not met; escalated = complaint or urgent escalation required.
 """ + _MOHANS_CALL_CONTEXT + _SENTIMENT_ANALYSIS_RULES + _STT_CORRECTION_NOTES + _GUARDRAIL_RULES + """
 __TRANSCRIPT__

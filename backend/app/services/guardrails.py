@@ -278,7 +278,8 @@ def sanitize_provider_result_for_client(result: ProviderResult) -> ProviderResul
                 resolution_status=sanitized["resolution_status"],
                 confidence=sanitized["confidence"],
                 notes=sanitized.get("notes") or "",
-            )
+            ),
+            transcript=str(data.get("transcript") or ""),
         )
 
     if data.get("error"):

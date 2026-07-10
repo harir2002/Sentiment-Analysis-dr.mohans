@@ -3,14 +3,14 @@ import {
   getCanonicalConfidence,
 } from './canonicalResult';
 import { getRecordingAssessment } from './callValidity';
+import { getPrimaryNextStep } from './nextSteps';
 
 /** Canonical recommendation / next step for the winning solution. */
 export function getCanonicalRecommendation(record) {
   const fromApi = record?.final_recommendation;
   if (fromApi && String(fromApi).trim()) return String(fromApi).trim();
   const canonical = getCanonicalResult(record);
-  const action = canonical?.analysis?.recommended_action;
-  return action && String(action).trim() ? String(action).trim() : null;
+  return getPrimaryNextStep(canonical?.analysis);
 }
 
 /** Badge-ready sentiment: positive | neutral | negative | invalid */

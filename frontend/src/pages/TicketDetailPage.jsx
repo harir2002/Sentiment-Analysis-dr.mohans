@@ -235,10 +235,22 @@ export default function TicketDetailPage({ jobId }) {
           </div>
 
           <div className={styles['insight-recommendation']}>
-            <span className={styles['insight-label']}>Recommended Next Step</span>
-            <p className={styles['insight-action']}>
-              {ticket.recommendation || 'No recommendation available yet.'}
-            </p>
+            <span className={styles['insight-label']}>Next Steps</span>
+            {ticket.nextSteps?.length > 0 ? (
+              ticket.nextSteps.length === 1 ? (
+                <p className={styles['insight-action']}>{ticket.nextSteps[0]}</p>
+              ) : (
+                <ul className={styles['insight-action-list']}>
+                  {ticket.nextSteps.map((step) => (
+                    <li key={step} className={styles['insight-action']}>{step}</li>
+                  ))}
+                </ul>
+              )
+            ) : (
+              <p className={styles['insight-action']}>
+                {ticket.recommendation || 'No recommendation available yet.'}
+              </p>
+            )}
           </div>
         </div>
 
@@ -285,12 +297,6 @@ export default function TicketDetailPage({ jobId }) {
                 <SentimentBadge sentiment={ticket.sentiment} />
               </div>
             </div>
-            {ticket.recommendation && (
-              <div className={styles['next-action-box']}>
-                <span className={styles['next-action-label']}>Next action</span>
-                <p>{ticket.recommendation}</p>
-              </div>
-            )}
           </SectionCard>
 
           <SectionCard title="Summary" subtitle="What happened and why it matters">
@@ -303,16 +309,6 @@ export default function TicketDetailPage({ jobId }) {
                 <ul className={styles['issues-list']}>
                   {ticket.keyIssues.map((issue) => (
                     <li key={issue}>{issue}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {ticket.actionItems.length > 0 && (
-              <div className={styles['issues-block']}>
-                <span className={styles['issues-label']}>Action items</span>
-                <ul className={styles['issues-list']}>
-                  {ticket.actionItems.map((item) => (
-                    <li key={item}>{item}</li>
                   ))}
                 </ul>
               </div>

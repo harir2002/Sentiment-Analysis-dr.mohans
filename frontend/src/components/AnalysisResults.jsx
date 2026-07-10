@@ -1,18 +1,6 @@
 import TranscriptPanel from './TranscriptPanel';
 import { Card, CardHeader, Alert, SentimentBadge } from './ui';
-
-function nextStepsFromAnalysis(analysis) {
-  if (!analysis) return [];
-  const steps = [];
-  if (analysis.recommended_action?.trim()) {
-    steps.push(analysis.recommended_action.trim());
-  }
-  (analysis.action_items || []).forEach((item) => {
-    const text = String(item || '').trim();
-    if (text && !steps.includes(text)) steps.push(text);
-  });
-  return steps;
-}
+import { getNextStepsFromAnalysis } from '../utils/nextSteps';
 
 export function pickClientResult(results, ranking) {
   if (!results?.length) return null;
@@ -46,7 +34,7 @@ export default function AnalysisResults({ result }) {
 
   if (!completed) return null;
 
-  const nextSteps = nextStepsFromAnalysis(analysis);
+  const nextSteps = getNextStepsFromAnalysis(analysis);
 
   return (
     <div className="results-layout">

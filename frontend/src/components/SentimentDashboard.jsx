@@ -14,6 +14,7 @@ import {
   getRecordPreviewText,
   getRecommendationSnippet,
 } from '../utils/recordingDisplay';
+import { getNextStepsFromAnalysis } from '../utils/nextSteps';
 import { getRecordingAssessment } from '../utils/callValidity';
 import { navigateToTicket } from '../utils/appNavigation';
 import styles from './SentimentDashboard.module.css';
@@ -67,12 +68,6 @@ function RecordResultSummary({ result }) {
       <p className={styles['solution-card-summary']}>
         {result.analysis.summary || 'No summary available.'}
       </p>
-      {result.analysis.recommended_action && (
-        <div className={styles['solution-card-action']}>
-          <span className={styles['solution-card-action-label']}>Next Step</span>
-          <p className={styles['solution-card-action-text']}>{result.analysis.recommended_action}</p>
-        </div>
-      )}
     </>
   );
 }
@@ -91,6 +86,7 @@ function ExpandableRecordCard({ record, index, onToggleExpand, expanded, onRemov
   const sentiment = getDisplaySentiment(record);
   const isInvalid = !assessment.isValidCall || assessment.sentimentLabel === 'invalid';
   const recommendation = getCanonicalRecommendation(record);
+  const nextSteps = getNextStepsFromAnalysis(analysis);
   const previewText = getRecordPreviewText(record);
   const recommendationSnippet = getRecommendationSnippet(record, 72);
   const summary = analysis?.summary || 'No summary available.';
@@ -268,12 +264,22 @@ function ExpandableRecordCard({ record, index, onToggleExpand, expanded, onRemov
                 <RecordResultSummary result={canonicalResult} />
               </div>
 
-              {/* Next Step */}
-              {recommendation && (
+              {/* Next Steps */}
+              {nextSteps.length > 0 && (
                 <div className={styles['record-expanded-section']}>
                   <h5 className={styles['section-title']}>Next Steps</h5>
                   <div className={styles['action-box']}>
-                    <p className={styles['action-text']}>{recommendation}</p>
+                    {nextSteps.length === 1 ? (
+                      <p className={styles['action-text']}>{nextSteps[0]}</p>
+                    ) : (
+                      <ul className={styles['action-list']}>
+                        {nextSteps.map((step) => (
+                          <li key={step} className={styles['action-list-item']}>
+                            <p className={styles['action-list-text']}>{step}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 </div>
               )}

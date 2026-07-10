@@ -169,20 +169,20 @@ def _apply_llm_result(result: ProviderResult, llm_result) -> ProviderResult:
             result.error = f"{llm_result.error} | parse: {llm_result.parse_error}"
         return result
 
-    result.analysis = enrich_analysis(
-        refine_sentiment(
-            AnalysisResult(
-                sentiment=llm_result.sentiment,
-                key_issues=llm_result.key_issues,
-                summary=llm_result.summary,
-                action_items=llm_result.action_items,
-                resolution_status=llm_result.resolution_status,
-                confidence=llm_result.confidence,
-                notes=llm_result.notes,
-            ),
-            result.transcript or "",
-        )
+    transcript = result.transcript or ""
+    refined = refine_sentiment(
+        AnalysisResult(
+            sentiment=llm_result.sentiment,
+            key_issues=llm_result.key_issues,
+            summary=llm_result.summary,
+            action_items=llm_result.action_items,
+            resolution_status=llm_result.resolution_status,
+            confidence=llm_result.confidence,
+            notes=llm_result.notes,
+        ),
+        transcript,
     )
+    result.analysis = enrich_analysis(refined, transcript=transcript)
     result.status = "completed"
     result.error = None
     result.parsing_error = None
