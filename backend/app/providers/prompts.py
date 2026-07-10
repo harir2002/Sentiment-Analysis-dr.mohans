@@ -54,7 +54,7 @@ Label definitions:
 
 Dr. Mohan's decision rules (apply in order):
 1. Lab/report delay or missing outstation report: timeline accepted calmly → neutral or positive; frustrated or unresolved → negative or mixed.
-2. Home blood collection or home care scheduling: visit booked and caller cooperative with no doubts → positive; partial booking or pending confirmation → mixed; failed scheduling or upset caller → negative.
+2. Home blood collection, home care visits, or home injections (e.g., hemoglobin injection): visit booked and caller cooperative with no doubts → positive; partial booking or pending confirmation → mixed; failed scheduling or upset caller → negative.
 3. Mobile app, login, or digital report access issues: at minimum mixed; strong or repeated complaints → negative.
 4. Branch transfer or long hold: caller complains about wait → mixed or negative; calm and resolved → positive or neutral.
 5. Appointment or home visit successfully arranged with cooperative caller and no open issues → positive. Do NOT downgrade to neutral just because the call is transactional.

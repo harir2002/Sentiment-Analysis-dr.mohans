@@ -20,8 +20,10 @@ _COMPLAINT_RE = re.compile(
 
 _SCHEDULING_SUCCESS_RE = re.compile(
     r"\b("
-    r"home visit|home care|blood test|home blood|booked|fixed it for you|"
-    r"fixed a home|scheduled|saturday morning|confirm the timing|taking it at home"
+    r"home visit|home care|blood test|home blood|hemoglobin injection|injection at home|"
+    r"booked|booking|appointment|arrange(?:d|ment)?|fixed it for you|fixed a home|"
+    r"scheduled|saturday morning|confirm(?:ing|ed)? details|payment arrangement|"
+    r"taking it at home|visit for her|visit for his"
     r")\b",
     re.I,
 )
@@ -29,7 +31,8 @@ _SCHEDULING_SUCCESS_RE = re.compile(
 _COOPERATIVE_CLOSURE_RE = re.compile(
     r"\b("
     r"no doubts|no other doubts|any other doubts\?\s*no|okay,?\s*alright|"
-    r"yes\.?\s*okay|thank you for calling"
+    r"yes\.?\s*okay|thank you for calling|confirming details|payment arrangement|"
+    r"arranged successfully|have a great day"
     r")\b",
     re.I,
 )
@@ -88,14 +91,14 @@ def refine_sentiment(analysis: AnalysisResult, transcript: str) -> AnalysisResul
             )
 
         if has_scheduling_success and (
-            has_cooperative_closure or resolution == "resolved"
+            has_cooperative_closure or resolution in _RESOLVED_STATUSES
         ):
             return analysis.model_copy(
                 update={
                     "sentiment": "positive",
                     "notes": _append_note(
                         analysis.notes,
-                        "Sentiment refined to positive: home visit or blood test successfully arranged with cooperative caller.",
+                        "Sentiment refined to positive: home visit, injection, or appointment successfully arranged with cooperative caller.",
                     ),
                 }
             )

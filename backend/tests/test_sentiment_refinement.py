@@ -39,6 +39,21 @@ def test_refine_neutral_app_complaint_to_mixed():
     assert refined.sentiment == "mixed"
 
 
+def test_refine_neutral_hemoglobin_home_visit_to_positive():
+    analysis = AnalysisResult(
+        sentiment="neutral",
+        summary=(
+            "Patient Bhuvaneshwari called to arrange a home visit for a hemoglobin injection "
+            "for her elderly mother, confirming details and payment arrangements."
+        ),
+        resolution_status="partially_resolved",
+        confidence=0.82,
+        notes="",
+    )
+    refined = refine_sentiment(analysis, "")
+    assert refined.sentiment == "positive"
+
+
 def test_refine_negative_complaint_unchanged():
     analysis = AnalysisResult(
         sentiment="negative",
