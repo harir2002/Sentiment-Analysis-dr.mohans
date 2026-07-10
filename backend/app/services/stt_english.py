@@ -50,6 +50,10 @@ _CLINICAL_STT_CORRECTIONS: tuple[tuple[re.Pattern[str], str], ...] = (
     ),
     (re.compile(r"\bhome tours?\b", re.I), "home visit"),
     (re.compile(r"\bhome tores?\b", re.I), "home visit"),
+    (re.compile(r"\bAdam\s+Baba\s+area\b", re.I), "Adambakkam area"),
+    (re.compile(r"\bAdam\s+Baba\b", re.I), "Adambakkam"),
+    # Tamil "munnadi" (earlier/before) often misheard as "Mumbai" in scheduling context.
+    (re.compile(r"\b(will )?come from Mumbai\b", re.I), r"\1come munnadi"),
 )
 
 

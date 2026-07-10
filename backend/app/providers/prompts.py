@@ -27,9 +27,13 @@ Security and scope rules (mandatory):
 
 _STT_CORRECTION_NOTES = """
 Known STT corrections (Dr. Mohan's Diabetes Specialities Centre):
+- Calls are spoken in regional Indian languages (Tamil, Telugu, Hindi, Kannada, Malayalam, Marathi, Bengali, Gujarati, Punjabi) or English, often code-mixed. STT translates to English; do not treat missing words as absence of content — infer carefully from context.
+- Listen for every detail in the transcript; STT should capture each utterance but may garble names, places, or Tamil-English phrases.
 - "death test" in lab/report context usually means "blood test".
 - "Director Specialty Center", "Directorate Specialty Center", or similar usually means "Dr. Mohan's Diabetes Specialities Centre".
 - "home tour" or "home tore" in visit context usually means "home visit" or "home care visit".
+- "Adam Baba area" or "Adam Baba" usually means the Chennai locality "Adambakkam area" or "Adambakkam".
+- "come from Mumbai" or "will come from Mumbai" in home-visit or blood-test scheduling usually means Tamil "munnadi" (earlier/before), not the city Mumbai.
 """
 
 _MOHANS_CALL_CONTEXT = """
@@ -39,6 +43,19 @@ Organization context (Dr. Mohan's Diabetes Specialities Centre):
 - Callers may use English, Tamil, or mixed language; transcripts may contain STT errors.
 - Hold music, IVR prompts, vaccination promotions, and agent scripts are NOT patient sentiment.
 - Judge sentiment only from the patient, caller, or attendant — never from the agent.
+"""
+
+_SUMMARY_RULES = """
+Summary rules (mandatory — distinguish caller from patient):
+- Many calls are made by attendants, spouses, sons, daughters, or caregivers booking for someone else at home.
+- The CALLER is the person speaking on the phone; the PATIENT is the person receiving care.
+- Do NOT write "Patient [caller name] requested..." when that person is calling on behalf of a relative or another patient.
+- If the caller books for someone else, name both roles when known from the transcript.
+  Example: "Caller Bhuvaneshwari arranged a home hemoglobin injection for her elderly mother; charges, logistics, and a next-day home visit were confirmed."
+- If the caller is the patient, say so clearly: "The patient requested a home blood test for tomorrow."
+- Use transcript cues: "for my mother", "for my husband", "Madam at home", "for her", "patient at home", "taking it at home".
+- If the patient name or relationship is unclear, use "the patient" or "a family member at home" — do not assume the caller is the patient.
+- summary must be 1-2 factual sentences and must not conflate caller identity with patient identity.
 """
 
 _SENTIMENT_ANALYSIS_RULES = """
@@ -99,7 +116,7 @@ Strict rules:
 - resolution_status reflects whether the customer's need was met.
 - confidence is a number from 0.0 to 1.0 based on transcript clarity and sentiment certainty.
 - notes may be an empty string if nothing notable.
-""" + _MOHANS_CALL_CONTEXT + _SENTIMENT_ANALYSIS_RULES + _STT_CORRECTION_NOTES + _GUARDRAIL_RULES + """
+""" + _MOHANS_CALL_CONTEXT + _SUMMARY_RULES + _SENTIMENT_ANALYSIS_RULES + _STT_CORRECTION_NOTES + _GUARDRAIL_RULES + """
 __TRANSCRIPT__
 """
 

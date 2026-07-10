@@ -30,6 +30,7 @@ from app.services.stt_language import (
     infer_detected_language_code,
     log_stt_language_event,
     cache_key_for_language,
+    MOHANS_STT_BASE_PROMPT,
 )
 
 logger = logging.getLogger(__name__)
@@ -95,6 +96,12 @@ class SarvamSTTAdapter(STTProvider):
             api_language,
             audio_path,
         )
+        logger.debug(
+            "Sarvam STT regional-language context (auto-detect, 22+ Indian languages): %s",
+            MOHANS_STT_BASE_PROMPT[:200],
+        )
+        if initial_prompt and initial_prompt.strip() != MOHANS_STT_BASE_PROMPT.strip():
+            logger.debug("Sarvam STT received custom initial_prompt (not sent to API): %s", initial_prompt[:120])
 
         try:
             api_key = settings.require_sarvam_key()

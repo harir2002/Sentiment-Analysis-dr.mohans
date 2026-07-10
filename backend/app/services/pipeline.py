@@ -26,6 +26,7 @@ from app.services.stt_language import (
     infer_detected_language_code,
     log_stt_language_event,
     analyze_transcript_language,
+    stt_initial_prompt,
 )
 from app.services.stt_english import (
     ENGLISH_TRANSLATION_FAILED,
@@ -92,7 +93,9 @@ async def transcribe(audio_path: str, provider_name: str, *, language_code: str 
     )
 
     result = await get_stt_provider(provider_name).transcribe(
-        audio_path, language_code=None
+        audio_path,
+        language_code=None,
+        initial_prompt=stt_initial_prompt(None),
     )
     result = _attach_language_metadata(result)
 

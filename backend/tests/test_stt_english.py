@@ -51,3 +51,20 @@ def test_normalize_english_transcript_fixes_directorate_and_home_tour():
     assert "home tour" not in corrected.lower()
     assert "Dr. Mohan's Diabetes Specialities Centre" in corrected
     assert "home visit" in corrected.lower()
+
+
+def test_normalize_english_transcript_fixes_adambakkam_area():
+    raw = "The patient lives in Adam Baba area near Velachery."
+    corrected = normalize_english_transcript(raw)
+    assert "Adambakkam area" in corrected
+    assert "Adam Baba" not in corrected
+
+
+def test_normalize_english_transcript_fixes_mumbai_to_munnadi():
+    raw = (
+        "We are in the Adambakkam area. They have come early. "
+        "They will come from Mumbai for the blood test tomorrow."
+    )
+    corrected = normalize_english_transcript(raw)
+    assert "come munnadi" in corrected.lower()
+    assert "from mumbai" not in corrected.lower()

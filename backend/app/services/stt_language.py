@@ -36,11 +36,28 @@ WHISPER_ISO_TO_BCP47: dict[str, str] = {
     "pa": "pa-IN",
 }
 
+# Shared STT context for Dr. Mohan's regional call-center audio (Whisper prompt field).
+# Sarvam saaras:v3 uses auto language detection instead of a text prompt.
+MOHANS_STT_BASE_PROMPT = (
+    "Dr. Mohan's Diabetes Specialities Centre patient call center recording. "
+    "Listen carefully: speech may be Tamil, Telugu, Hindi, Kannada, Malayalam, Marathi, "
+    "Bengali, Gujarati, Punjabi, or English, often code-mixed. "
+    "Transcribe or translate every word spoken by the caller and agent; do not skip, "
+    "summarize, or omit any utterance. Include medical terms, Chennai locality names, "
+    "appointment times, and mixed Tamil-English phrases."
+)
+
 WHISPER_LANGUAGE_PROMPTS: dict[str, str] = {
-    "ta": "வணக்கம். இது தமிழ் மொழியில் பேசப்பட்ட குரல் பதிவு.",
-    "te": "నమస్కారం. ఇది తెలుగు భాషలో మాట్లాడిన ఆడియో రికార్డింగ్.",
-    "hi": "नमस्ते। यह हिंदी भाषा में बोला गया ऑडियो रिकॉर्डिंग है।",
-    "en": "Hello. This is an English language voice recording.",
+    "ta": "வணக்கம். தமிழ் மொழியில் பேசப்பட்ட குரல் பதிவு. ஒவ்வொரு வார்த்தையையும் துல்லியமாக பதிவு செய்யவும்.",
+    "te": "నమస్కారం. తెలుగు భాషలో మాట్లాడిన ఆడియో. ప్రతి పదాన్ని కోరివద్దకుండా ట్రాన్స్క్రైబ్ చేయండి.",
+    "hi": "नमस्ते। हिंदी भाषा में बोला गया ऑडियो। हर शब्द को बिना छोड़े लिप्यंतरित करें।",
+    "en": "Hello. English voice recording. Capture every spoken word without omission.",
+    "kn": "ನಮಸ್ಕಾರ. ಕನ್ನಡ ಭಾಷೆಯ ಧ್ವನಿ ದಾಖಲೆ. ಪ್ರತಿ ಪದವನ್ನು ಬಿಟ್ಟುಬಿಡದೆ ಲಿಪ್ಯಂತರಿಸಿ.",
+    "ml": "നമസ്കാരം. മലയാളം ഭാഷയിലെ ശബ്ദ റെക്കോർഡിംഗ്. ഓരോ വാക്കും വിട്ടുകളയാതെ എഴുതുക.",
+    "mr": "नमस्कार. मराठी भाषेतील ऑडिओ. प्रत्येक शब्द अचूक लिप्यंतरित करा.",
+    "bn": "নমস্কার। বাংলা ভাষায় রেকর্ডিং। প্রতিটি শব্দ বাদ দিয়ে লিপিবদ্ধ করুন।",
+    "gu": "નમસ્તે. ગુજરાતી ભાષાની ઓડિયો. દરેક શબ્દ ચૂક્યા વિના લખો.",
+    "pa": "ਸਤ ਸ੍ਰੀ ਅਕਾਲ। ਪੰਜਾਬੀ ਭਾਸ਼ਾ ਦੀ ਰਿਕਾਰਡਿੰਗ। ਹਰ ਸ਼ਬਦ ਬਿਨਾਂ ਛੋਡੇ ਲਿਪੀਬੱਧ ਕਰੋ।",
 }
 
 _SCRIPT_RANGES: dict[str, tuple[int, int]] = {
@@ -131,11 +148,24 @@ def whisper_language_code(language_code: str) -> str:
     return resolved.split("-")[0].lower()
 
 
+def stt_initial_prompt(language_code: str | None = None) -> str:
+    """Context prompt for STT engines that support an initial prompt (e.g. Whisper)."""
+    if is_auto_detect(language_code):
+        return MOHANS_STT_BASE_PROMPT
+    try:
+        base = whisper_language_code(normalize_language_code(language_code))
+    except ValueError:
+        return MOHANS_STT_BASE_PROMPT
+    lang_hint = WHISPER_LANGUAGE_PROMPTS.get(base)
+    if lang_hint:
+        return f"{MOHANS_STT_BASE_PROMPT} {lang_hint}"
+    return MOHANS_STT_BASE_PROMPT
+
+
 def whisper_initial_prompt(language_code: str) -> str | None:
     if is_auto_detect(language_code):
-        return None
-    base = whisper_language_code(normalize_language_code(language_code))
-    return WHISPER_LANGUAGE_PROMPTS.get(base)
+        return stt_initial_prompt(language_code)
+    return stt_initial_prompt(language_code)
 
 
 def display_language(language_code: str | None) -> str:

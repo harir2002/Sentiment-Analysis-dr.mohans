@@ -13,6 +13,7 @@ from app.services.stt_language import (
     infer_detected_language_code,
     log_stt_language_event,
     analyze_transcript_language,
+    stt_initial_prompt,
 )
 
 logger = logging.getLogger(__name__)
@@ -59,6 +60,9 @@ class GroqWhisperAdapter(STTProvider):
                         "response_format": "verbose_json",
                         "temperature": 0,
                     }
+                    prompt = (initial_prompt or stt_initial_prompt(language_code)).strip()
+                    if prompt:
+                        data["prompt"] = prompt[:1000]
                     response = await post_with_retry(
                         client,
                         settings.groq_stt_translate_url,

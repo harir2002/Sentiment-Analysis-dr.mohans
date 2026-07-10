@@ -8,6 +8,7 @@ from app.services.stt_language import (
     is_low_confidence_detection,
     whisper_language_code,
     whisper_initial_prompt,
+    stt_initial_prompt,
 )
 
 
@@ -44,5 +45,14 @@ def test_low_confidence_on_empty():
     assert is_low_confidence_detection(transcript="", inferred_language=None) is True
 
 
-def test_whisper_prompt_none_for_auto():
-    assert whisper_initial_prompt("auto") is None
+def test_whisper_prompt_includes_mohans_context_for_auto():
+    prompt = whisper_initial_prompt("auto")
+    assert prompt is not None
+    assert "Tamil" in prompt
+    assert "every word" in prompt.lower() or "every word" in prompt
+
+
+def test_stt_initial_prompt_for_tamil():
+    prompt = stt_initial_prompt("ta-IN")
+    assert "Tamil" in prompt or "தமிழ்" in prompt
+    assert "Dr. Mohan's" in prompt
