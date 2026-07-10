@@ -28,6 +28,8 @@ def test_build_sarvam_analysis_prompt_includes_mohans_production_rules():
     assert "home blood collection" in prompt.lower()
     assert "Do NOT default to neutral" in prompt
     assert "successfully arranged with cooperative caller" in prompt.lower()
+    assert "distinguish caller from patient" in prompt.lower()
+    assert "Is the patient's name" in prompt
     assert "Customer said the app is useless" in prompt
 
 
@@ -35,8 +37,10 @@ def test_build_sarvam_analysis_prompt_includes_home_visit_positive_guidance():
     prompt = build_sarvam_analysis_prompt(
         "Home visit booked for Saturday. Caller confirmed no doubts."
     )
-    assert "visit booked and caller cooperative" in prompt.lower()
+    assert "home care visits, or home injections" in prompt.lower()
+    assert "still positive, not mixed" in prompt.lower()
     assert "lean positive" in prompt.lower()
+    assert "A relative arranged a home hemoglobin injection for patient Bhuvaneshwari" in prompt
 
 
 def test_build_analysis_prompt_handles_empty_transcript():

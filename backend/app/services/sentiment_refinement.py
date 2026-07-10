@@ -31,13 +31,26 @@ _SCHEDULING_SUCCESS_RE = re.compile(
 _COOPERATIVE_CLOSURE_RE = re.compile(
     r"\b("
     r"no doubts|no other doubts|any other doubts\?\s*no|okay,?\s*alright|"
-    r"yes\.?\s*okay|thank you for calling|confirming details|payment arrangement|"
-    r"arranged successfully|have a great day"
+    r"yes\.?\s*okay|thank you(?:\s+very\s+much)?(?:\s+for\s+calling)?|"
+    r"confirming details|payment arrangement|arranged successfully|"
+    r"have a great day|i'll arrange|i will arrange|"
+    r"they will come tomorrow|we can give it|okay ma'?am,?\s*thank"
     r")\b",
     re.I,
 )
 
 _RESOLVED_STATUSES = frozenset({"resolved", "partially_resolved"})
+
+# Agent confirms patient identity separately from the person on the phone.
+_PATIENT_NAME_CONFIRM_RE = re.compile(
+    r"\b(?:is\s+(?:the\s+)?)?patient'?s?\s+name\s+(?:is\s+)?([A-Za-z]+)\b",
+    re.I,
+)
+_WRONG_PATIENT_AS_CALLER_RE = re.compile(
+    r"^Patient\s+([A-Za-z]+)\s+"
+    r"(?:requested|called(?:\s+to)?|arranged|booked)\s+(.+)$",
+    re.I | re.S,
+)
 
 
 def _combined_text(analysis: AnalysisResult, transcript: str) -> str:
@@ -57,6 +70,59 @@ def _append_note(existing: str, addition: str) -> str:
     if addition.lower() in note.lower():
         return note
     return f"{note} {addition}".strip()
+
+
+def _should_upgrade_booking_to_positive(
+    *,
+    has_complaint: bool,
+    has_scheduling_success: bool,
+    has_cooperative_closure: bool,
+    resolution: str,
+) -> bool:
+    """Successful home-care booking with no real complaint is positive, not mixed/neutral."""
+    if has_complaint or not has_scheduling_success:
+        return False
+    return has_cooperative_closure or resolution in _RESOLVED_STATUSES
+
+
+def refine_summary(analysis: AnalysisResult, transcript: str) -> AnalysisResult:
+    """Fix summaries that treat a confirmed patient name as if that person called."""
+    summary = (analysis.summary or "").strip()
+    if not summary or not (transcript or "").strip():
+        return analysis
+
+    confirmed = {m.group(1).lower() for m in _PATIENT_NAME_CONFIRM_RE.finditer(transcript)}
+    if not confirmed:
+        return analysis
+
+    match = _WRONG_PATIENT_AS_CALLER_RE.match(summary)
+    if not match:
+        return analysis
+
+    name = match.group(1)
+    if name.lower() not in confirmed:
+        return analysis
+
+    rest = match.group(2).strip().rstrip(".")
+    # Prefer a clean relative/patient split for the common home-care booking pattern.
+    if "," in rest:
+        service, _, after = rest.partition(",")
+        new_summary = (
+            f"A relative arranged {service.strip()} for patient {name};"
+            f"{after.strip()}."
+        )
+    else:
+        new_summary = f"A relative arranged {rest} for patient {name}."
+
+    return analysis.model_copy(
+        update={
+            "summary": new_summary,
+            "notes": _append_note(
+                analysis.notes,
+                f"Summary refined: {name} is the patient; a relative booked on their behalf.",
+            ),
+        }
+    )
 
 
 def refine_sentiment(analysis: AnalysisResult, transcript: str) -> AnalysisResult:
@@ -90,8 +156,11 @@ def refine_sentiment(analysis: AnalysisResult, transcript: str) -> AnalysisResul
                 }
             )
 
-        if has_scheduling_success and (
-            has_cooperative_closure or resolution in _RESOLVED_STATUSES
+        if _should_upgrade_booking_to_positive(
+            has_complaint=has_complaint,
+            has_scheduling_success=has_scheduling_success,
+            has_cooperative_closure=has_cooperative_closure,
+            resolution=resolution,
         ):
             return analysis.model_copy(
                 update={
@@ -102,6 +171,23 @@ def refine_sentiment(analysis: AnalysisResult, transcript: str) -> AnalysisResul
                     ),
                 }
             )
+
+    # LLM often marks successful bookings "mixed" because of hold/transfer or "call back to confirm".
+    if sentiment == "mixed" and _should_upgrade_booking_to_positive(
+        has_complaint=has_complaint,
+        has_scheduling_success=has_scheduling_success,
+        has_cooperative_closure=has_cooperative_closure,
+        resolution=resolution,
+    ):
+        return analysis.model_copy(
+            update={
+                "sentiment": "positive",
+                "notes": _append_note(
+                    analysis.notes,
+                    "Sentiment refined to positive: successful home care/injection booking without service complaint (hold or callback-to-confirm is not mixed).",
+                ),
+            }
+        )
 
     if sentiment == "positive" and has_complaint and not has_scheduling_success:
         return analysis.model_copy(
@@ -117,4 +203,9 @@ def refine_sentiment(analysis: AnalysisResult, transcript: str) -> AnalysisResul
     return analysis
 
 
-__all__ = ["refine_sentiment"]
+def refine_analysis(analysis: AnalysisResult, transcript: str) -> AnalysisResult:
+    """Apply sentiment then summary corrections for Dr. Mohan's call patterns."""
+    return refine_summary(refine_sentiment(analysis, transcript), transcript)
+
+
+__all__ = ["refine_sentiment", "refine_summary", "refine_analysis"]

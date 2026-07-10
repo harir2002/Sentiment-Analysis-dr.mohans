@@ -51,12 +51,15 @@ Organization context (Dr. Mohan's Diabetes Specialities Centre):
 _SUMMARY_RULES = """
 Summary rules (mandatory — distinguish caller from patient):
 - Many calls are made by attendants, spouses, sons, daughters, or caregivers booking for someone else at home.
-- The CALLER is the person speaking on the phone; the PATIENT is the person receiving care.
-- Do NOT write "Patient [caller name] requested..." when that person is calling on behalf of a relative or another patient.
-- If the caller books for someone else, name both roles when known from the transcript.
-  Example: "Caller Bhuvaneshwari arranged a home hemoglobin injection for her elderly mother; charges, logistics, and a next-day home visit were confirmed."
+- The CALLER is the person speaking on the phone; the PATIENT is the person receiving care. They are often different people.
+- NEVER write "Patient [Name] requested/called/arranged..." unless the transcript clearly shows that same person is both the caller and the patient.
+- When the agent asks "Is the patient's name [Name]?" and the caller answers yes, [Name] is the PATIENT — the person on the phone is a relative/caregiver booking for them.
+- Prefer: "A relative arranged a home hemoglobin injection for patient Bhuvaneshwari; charges, logistics, and a next-day home visit were confirmed."
+- Wrong: "Patient Bhuvaneshwari requested a home hemoglobin injection..." (implies she herself called).
+- If the caller books for someone else, name both roles when known: "Caller [Name] arranged ... for patient [Other Name]..."
 - If the caller is the patient, say so clearly: "The patient requested a home blood test for tomorrow."
-- Use transcript cues: "for my mother", "for my husband", "Madam at home", "for her", "patient at home", "taking it at home".
+- Use transcript cues: "Is the patient's name", "patient ma'am/sir", "for my mother/father/husband/wife", "Madam at home", "for her/him", "patient at home", "bring him/her", age or mobility of the patient discussed by the caller.
+- If the patient name is known but the caller's name is not, write "A relative/caregiver arranged ... for patient [Name]..." — do not treat the patient name as the caller.
 - If the patient name or relationship is unclear, use "the patient" or "a family member at home" — do not assume the caller is the patient.
 - summary must be 1-2 factual sentences and must not conflate caller identity with patient identity.
 """
@@ -74,14 +77,15 @@ Label definitions:
 
 Dr. Mohan's decision rules (apply in order):
 1. Lab/report delay or missing outstation report: timeline accepted calmly → neutral or positive; frustrated or unresolved → negative or mixed.
-2. Home blood collection, home care visits, or home injections (e.g., hemoglobin injection): visit booked and caller cooperative with no doubts → positive; partial booking or pending confirmation → mixed; failed scheduling or upset caller → negative.
+2. Home blood collection, home care visits, or home injections (e.g., hemoglobin injection): if the visit/injection is agreed (date/time window set, Home Care connected, caller accepts) and the caller is cooperative → positive. Agent saying "I will call you back to confirm" after arranging the visit is still positive, not mixed. Use mixed only when booking is refused, incomplete with caller frustration, or the caller remains upset. Failed scheduling or upset caller → negative.
 3. Mobile app, login, or digital report access issues: at minimum mixed; strong or repeated complaints → negative.
-4. Branch transfer or long hold: caller complains about wait → mixed or negative; calm and resolved → positive or neutral.
-5. Appointment or home visit successfully arranged with cooperative caller and no open issues → positive. Do NOT downgrade to neutral just because the call is transactional.
+4. Branch transfer or long hold: caller complains about wait → mixed or negative; calm hold/transfer that ends in successful Home Care booking → positive (do not mark mixed just because of hold music or department transfer).
+5. Appointment or home visit successfully arranged with cooperative caller and no open service complaints → positive. Do NOT downgrade to neutral or mixed just because the call is transactional, discusses payment, or mentions patient mobility/age.
 6. Caller confirms no remaining doubts or issues after resolution → lean positive.
 7. A polite goodbye or thanks at the end does NOT erase earlier frustration → do not downgrade negative or mixed to neutral.
-8. Do not mark positive if a critical medical concern remains unresolved.
+8. Do not mark positive if a critical medical concern remains unresolved AND the hospital failed to arrange care. Patient age, inability to walk, or needing home service is clinical context, not negative sentiment by itself.
 9. Do not mark neutral when the caller is clearly frustrated, even if the agent is polite.
+10. Do not mark mixed when the only "issues" are logistics (address, phone, charges, prescription WhatsApp) in an otherwise successful booking.
 
 Confidence guidance:
 - confidence 0.85–1.0: clear caller emotional cues across multiple turns.
@@ -168,7 +172,7 @@ Operational rules:
 - App login or digital report issue → route to App Support and call back when fixed.
 - Use complaint ticket / service recovery only for genuine unresolved complaints or escalation.
 - resolution_status: resolved = primary need fully addressed; partially_resolved = progress but follow-up required; unresolved = need not met; escalated = complaint or urgent escalation required.
-""" + _MOHANS_CALL_CONTEXT + _SENTIMENT_ANALYSIS_RULES + _STT_CORRECTION_NOTES + _GUARDRAIL_RULES + """
+""" + _MOHANS_CALL_CONTEXT + _SUMMARY_RULES + _SENTIMENT_ANALYSIS_RULES + _STT_CORRECTION_NOTES + _GUARDRAIL_RULES + """
 __TRANSCRIPT__
 """
 

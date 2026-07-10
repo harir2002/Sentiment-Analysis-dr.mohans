@@ -8,7 +8,7 @@ from app.models.schemas import (
     AnalysisResult,
 )
 from app.services.recommended_action import enrich_analysis
-from app.services.sentiment_refinement import refine_sentiment
+from app.services.sentiment_refinement import refine_analysis
 from app.providers.registry import (
     get_stt_provider,
     get_llm_provider,
@@ -173,7 +173,7 @@ def _apply_llm_result(result: ProviderResult, llm_result) -> ProviderResult:
         return result
 
     transcript = result.transcript or ""
-    refined = refine_sentiment(
+    refined = refine_analysis(
         AnalysisResult(
             sentiment=llm_result.sentiment,
             key_issues=llm_result.key_issues,
