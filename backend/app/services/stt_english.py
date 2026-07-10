@@ -50,6 +50,22 @@ _CLINICAL_STT_CORRECTIONS: tuple[tuple[re.Pattern[str], str], ...] = (
     ),
     (re.compile(r"\bDr\.?\s*Munda\b", re.I), _ORG_NAME),
     (re.compile(r"\bDoctor\s+Munda\b", re.I), _ORG_NAME),
+    # "Eye" is a common STT garble of "Diabetes" / "Speciality" hospital name.
+    (
+        re.compile(
+            r"\b(?:Dr\.?\s*)?Mohan(?:'?s)?\s+Eye\s+Special(?:ty|ities|ity)\s+"
+            r"(?:Cent(?:er|re)|Hospital)\b",
+            re.I,
+        ),
+        _ORG_NAME,
+    ),
+    (
+        re.compile(
+            r"\bMohan\s+Eye\s+Special(?:ty|ities|ity)\s+(?:Cent(?:er|re)|Hospital)\b",
+            re.I,
+        ),
+        _ORG_NAME,
+    ),
     (re.compile(r"\bhome tours?\b", re.I), "home visit"),
     (re.compile(r"\bhome tores?\b", re.I), "home visit"),
     (re.compile(r"\bAdam\s+Baba\s+area\b", re.I), "Adambakkam area"),
