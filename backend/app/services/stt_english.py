@@ -39,15 +39,17 @@ _CLINICAL_STT_CORRECTIONS: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"\bdeath test\b", re.I), "blood test"),
     (
         re.compile(
-            r"\bMohan(?:'?s)?\s+Director\s+Special(?:ty|ities|ity)\s+Cent(?:er|re)\b",
+            r"\bMohan(?:'?s)?\s+Director(?:ate)?\s+Special(?:ty|ities|ity)\s+Cent(?:er|re)\b",
             re.I,
         ),
         _ORG_NAME,
     ),
     (
-        re.compile(r"\bDirector\s+Special(?:ty|ities|ity)\s+Cent(?:er|re)\b", re.I),
+        re.compile(r"\bDirector(?:ate)?\s+Special(?:ty|ities|ity)\s+Cent(?:er|re)\b", re.I),
         _ORG_NAME,
     ),
+    (re.compile(r"\bhome tours?\b", re.I), "home visit"),
+    (re.compile(r"\bhome tores?\b", re.I), "home visit"),
 )
 
 

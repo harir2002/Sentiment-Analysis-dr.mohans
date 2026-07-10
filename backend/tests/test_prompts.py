@@ -19,16 +19,24 @@ def test_build_analysis_prompt_includes_transcript():
     assert "__TRANSCRIPT__" not in prompt
     assert '"notes"' in prompt
     assert "Security and scope rules" in prompt
-    assert "Sentiment analysis rules" in prompt
+    assert "Dr. Mohan's Diabetes Specialities Centre" in prompt
 
 
-def test_build_sarvam_analysis_prompt_includes_production_sentiment_rules():
+def test_build_sarvam_analysis_prompt_includes_mohans_production_rules():
     prompt = build_sarvam_analysis_prompt("Customer said the app is useless and cannot log in.")
-    assert "Judge sentiment from the CUSTOMER/CALLER only" in prompt
+    assert "Dr. Mohan's Diabetes Specialities Centre" in prompt
+    assert "home blood collection" in prompt.lower()
     assert "Do NOT default to neutral" in prompt
-    assert "polite" in prompt.lower() and "thank you" in prompt.lower()
-    assert "app/service quality" in prompt.lower() or "app/service" in prompt.lower()
+    assert "successfully arranged with cooperative caller" in prompt.lower()
     assert "Customer said the app is useless" in prompt
+
+
+def test_build_sarvam_analysis_prompt_includes_home_visit_positive_guidance():
+    prompt = build_sarvam_analysis_prompt(
+        "Home visit booked for Saturday. Caller confirmed no doubts."
+    )
+    assert "visit booked and caller cooperative" in prompt.lower()
+    assert "lean positive" in prompt.lower()
 
 
 def test_build_analysis_prompt_handles_empty_transcript():
