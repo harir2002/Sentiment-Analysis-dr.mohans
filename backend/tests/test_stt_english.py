@@ -105,3 +105,17 @@ def test_normalize_english_transcript_fixes_299_to_2999():
     assert "Rs 2999" in corrected
     assert "Number 299 " not in corrected + " "
     assert "Rs 299 " not in corrected + " "
+
+
+def test_normalize_english_transcript_fixes_two_thousand_ninety_nine():
+    raw = "The home care charge is two thousand ninety nine rupees."
+    corrected = normalize_english_transcript(raw)
+    assert "two thousand nine hundred and ninety nine" in corrected.lower()
+    assert "two thousand ninety nine" not in corrected.lower()
+
+
+def test_normalize_english_transcript_fixes_2099_to_2999_in_charges():
+    raw = "Service charge is Rs 2099 for the injection visit."
+    corrected = normalize_english_transcript(raw)
+    assert "Rs 2999" in corrected
+    assert "2099" not in corrected

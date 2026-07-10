@@ -110,6 +110,25 @@ _CLINICAL_STT_CORRECTIONS: tuple[tuple[re.Pattern[str], str], ...] = (
         ),
         r"\g<1>2999",
     ),
+    # Spoken amount: "two thousand ninety nine" (2099) → "two thousand nine hundred ninety nine" (2999).
+    (
+        re.compile(
+            r"\btwo\s+thousand\s+(?:and\s+)?ninety[\s-]?nine\b",
+            re.I,
+        ),
+        "two thousand nine hundred and ninety nine",
+    ),
+    (
+        re.compile(
+            r"\b((?:number|id|uhid|mrn|reg(?:istration)?(?:\s+number)?|"
+            r"patient\s+(?:id|number)|file\s+number|"
+            r"rs\.?|inr|rupees?|"
+            r"charge|charges|fee|amount|cost|payment|service\s+charge)"
+            r"\s*(?:of\s+|is\s+|are\s+|[:#])?\s*)2099\b",
+            re.I,
+        ),
+        r"\g<1>2999",
+    ),
 )
 
 
