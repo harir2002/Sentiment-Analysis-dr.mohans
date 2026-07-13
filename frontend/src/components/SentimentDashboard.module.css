@@ -121,27 +121,174 @@
   color: #94a3b8;
 }
 
-.kpi-card-interactive {
-  cursor: pointer;
+.kpi-card-wrap {
+  position: relative;
+  min-width: 0;
 }
 
-.kpi-card-interactive:hover,
-.kpi-card-interactive:focus-visible {
-  border-color: rgba(255, 255, 255, 0.22);
+.kpi-card-hoverable {
+  cursor: default;
+}
+
+.kpi-card-hoverable:hover,
+.kpi-card-hover-open {
+  border-color: rgba(255, 255, 255, 0.2);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.38);
+}
+
+.kpi-card-hoverable:focus-visible {
   outline: none;
-}
-
-.kpi-card-active {
   border-color: rgba(255, 255, 255, 0.28);
-  background: #171717;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 28px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 12px 28px rgba(0, 0, 0, 0.4);
 }
 
-.kpi-drill-arrow {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.45);
+.kpi-hover-anchor {
+  position: absolute;
+  top: calc(100% + 0.55rem);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  pointer-events: auto;
+}
+
+.kpi-hover-card {
+  width: min(100%, 320px);
+  max-height: 340px;
+  overflow: auto;
+  padding: 0.85rem 0.9rem;
+  background: #141414;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+}
+
+.kpi-hover-card-positive {
+  border-color: rgba(34, 197, 94, 0.22);
+}
+
+.kpi-hover-card-neutral {
+  border-color: rgba(245, 158, 11, 0.22);
+}
+
+.kpi-hover-card-negative {
+  border-color: rgba(239, 68, 68, 0.22);
+}
+
+.kpi-hover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.kpi-hover-title {
+  font-size: 0.78rem;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.kpi-hover-count {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.88);
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-hover-empty {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.4;
+}
+
+.kpi-hover-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.kpi-hover-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  padding: 0.55rem 0.6rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+}
+
+.kpi-hover-item-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.kpi-hover-filename {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.kpi-hover-date {
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.kpi-hover-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+}
+
+.kpi-hover-sentiment-positive {
+  color: #4ade80;
+  font-weight: 600;
+}
+
+.kpi-hover-sentiment-neutral {
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+.kpi-hover-sentiment-negative {
+  color: #f87171;
+  font-weight: 600;
+}
+
+.kpi-hover-confidence {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.kpi-hover-preview {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.58);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.kpi-hover-more {
+  margin: 0.55rem 0 0;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .kpi-suffix {

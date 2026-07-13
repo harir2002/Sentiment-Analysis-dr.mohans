@@ -32,24 +32,12 @@ function confirmDelete(filename) {
 }
 
 // DashboardSummary component - top-level metrics.
-function DashboardSummary({ records, sentimentFilter, onSentimentFilterChange }) {
+function DashboardSummary({ records }) {
   return (
     <div className={styles['dashboard-summary']}>
-      <DashboardKpiRow
-        records={records}
-        sentimentFilter={sentimentFilter}
-        onSentimentFilterChange={onSentimentFilterChange}
-      />
+      <DashboardKpiRow records={records} />
     </div>
   );
-}
-
-function recordMatchesSentimentFilter(record, sentimentFilter) {
-  if (!sentimentFilter) return true;
-  if (!record.results_ready) return false;
-  const { sentimentLabel, isValidCall } = getRecordingAssessment(record);
-  if (!isValidCall || sentimentLabel === 'invalid') return false;
-  return sentimentLabel === sentimentFilter;
 }
 
 // Compact result summary inside an expanded recording
@@ -353,7 +341,6 @@ export default function SentimentDashboard({ mode = 'dashboard' }) {
   const [expandedIds, setExpandedIds] = useState(new Set());
   const [deleting, setDeleting] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
-  const [sentimentFilter, setSentimentFilter] = useState(null);
   const [bulkDownloading, setBulkDownloading] = useState(false);
   const recordsListRef = useRef(null);
 
@@ -404,17 +391,9 @@ export default function SentimentDashboard({ mode = 'dashboard' }) {
     }
   };
 
-  const handleSentimentFilterChange = (next) => {
-    setSentimentFilter(next);
-    if (next && recordsListRef.current) {
-      recordsListRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
   const handleDownloadLatestReady = async () => {
     const candidates = [...records]
       .filter((r) => r.results_ready)
-      .filter((r) => recordMatchesSentimentFilter(r, sentimentFilter))
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     const target = candidates[0];
     if (!target) {
@@ -435,13 +414,7 @@ export default function SentimentDashboard({ mode = 'dashboard' }) {
     return (
       <div className={styles['sentiment-dashboard']}>
         {mode === 'dashboard' && <ExecutiveDashboardHeader records={[]} />}
-        {mode === 'dashboard' && (
-          <DashboardKpiRow
-            records={[]}
-            sentimentFilter={sentimentFilter}
-            onSentimentFilterChange={handleSentimentFilterChange}
-          />
-        )}
+        {mode === 'dashboard' && <DashboardKpiRow records={[]} />}
         <div className={styles['records-section']}>
           <Card>
             <CardHeader title={mode === 'crm' ? 'Loading tickets…' : 'Loading recordings…'} />
@@ -467,13 +440,7 @@ export default function SentimentDashboard({ mode = 'dashboard' }) {
     return (
       <div className={styles['sentiment-dashboard']}>
         {mode === 'dashboard' && <ExecutiveDashboardHeader records={[]} lastUpdated={lastUpdated} />}
-        {mode === 'dashboard' && (
-          <DashboardKpiRow
-            records={[]}
-            sentimentFilter={sentimentFilter}
-            onSentimentFilterChange={handleSentimentFilterChange}
-          />
-        )}
+        {mode === 'dashboard' && <DashboardKpiRow records={[]} />}
         {mode === 'dashboard' && <DashboardSentimentStory records={[]} />}
         <div className={styles['records-section']} ref={recordsListRef}>
           <EmptyState
@@ -494,27 +461,12 @@ export default function SentimentDashboard({ mode = 'dashboard' }) {
   const sortedRecords = [...records].sort(
     (a, b) => new Date(b.created_at) - new Date(a.created_at)
   );
-  const visibleRecords = sortedRecords.filter((record) =>
-    recordMatchesSentimentFilter(record, sentimentFilter)
-  );
-  const filterLabel =
-    sentimentFilter === 'positive'
-      ? 'Positive'
-      : sentimentFilter === 'negative'
-        ? 'Negative'
-        : null;
 
   return (
     <div className={styles['sentiment-dashboard']}>
       {mode === 'dashboard' && <ExecutiveDashboardHeader records={records} lastUpdated={lastUpdated} />}
 
-      {mode === 'dashboard' && (
-        <DashboardSummary
-          records={records}
-          sentimentFilter={sentimentFilter}
-          onSentimentFilterChange={handleSentimentFilterChange}
-        />
-      )}
+      {mode === 'dashboard' && <DashboardSummary records={records} />}
 
       {mode === 'dashboard' && <DashboardSentimentStory records={records} />}
 
@@ -522,31 +474,14 @@ export default function SentimentDashboard({ mode = 'dashboard' }) {
         <Card className={`${styles['records-header-card']} records-header-card`}>
           <div className={styles['records-header-row']}>
             <CardHeader
-              title={
-                mode === 'crm'
-                  ? 'CRM Ticket Explorer'
-                  : filterLabel
-                    ? `${filterLabel} Calls`
-                    : 'Record Explorer'
-              }
+              title={mode === 'crm' ? 'CRM Ticket Explorer' : 'Record Explorer'}
               subtitle={
                 mode === 'crm'
-                  ? `${visibleRecords.length} ticket${visibleRecords.length !== 1 ? 's' : ''} — open any ticket or expand a row for CRM details`
-                  : filterLabel
-                    ? `${visibleRecords.length} ${filterLabel.toLowerCase()} call${visibleRecords.length !== 1 ? 's' : ''} — clear the filter to see all recordings`
-                    : `${records.length} recording${records.length !== 1 ? 's' : ''} — click Positive or Negative above to drill down, or open a full ticket`
+                  ? `${records.length} ticket${records.length !== 1 ? 's' : ''} — open any ticket or expand a row for CRM details`
+                  : `${records.length} recording${records.length !== 1 ? 's' : ''} — hover sentiment metrics above for a quick preview, or open a full ticket`
               }
             />
             <div className={styles['records-header-actions']}>
-              {filterLabel && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleSentimentFilterChange(null)}
-                >
-                  Clear {filterLabel} filter
-                </Button>
-              )}
               <Button
                 variant="secondary"
                 size="sm"
@@ -559,30 +494,18 @@ export default function SentimentDashboard({ mode = 'dashboard' }) {
           </div>
         </Card>
 
-        {visibleRecords.length === 0 ? (
-          <EmptyState
-            icon="🔍"
-            title={filterLabel ? `No ${filterLabel} Calls` : 'No Recordings'}
-            description={
-              filterLabel
-                ? `No ${filterLabel.toLowerCase()} calls match this filter. Clear the filter to see all recordings.`
-                : 'No recordings available.'
-            }
-          />
-        ) : (
-          <div className={styles['records-list']}>
-            {visibleRecords.map((record, index) => (
-              <ExpandableRecordCard
-                key={record.job_id}
-                record={record}
-                index={index}
-                onToggleExpand={toggleExpand}
-                expanded={expandedIds.has(record.job_id)}
-                onRemove={handleRemoveRecording}
-              />
-            ))}
-          </div>
-        )}
+        <div className={styles['records-list']}>
+          {sortedRecords.map((record, index) => (
+            <ExpandableRecordCard
+              key={record.job_id}
+              record={record}
+              index={index}
+              onToggleExpand={toggleExpand}
+              expanded={expandedIds.has(record.job_id)}
+              onRemove={handleRemoveRecording}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
