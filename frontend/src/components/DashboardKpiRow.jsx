@@ -76,15 +76,13 @@ function SentimentHoverCard({ sentiment, items, totalCount }) {
         <ul className={styles['kpi-hover-list']}>
           {visible.map((item) => (
             <li key={item.id} className={styles['kpi-hover-item']}>
-              <div className={styles['kpi-hover-item-top']}>
-                <span className={styles['kpi-hover-filename']} title={item.filename}>
-                  {item.filename}
-                </span>
+              <p className={styles['kpi-hover-filename']} title={item.filename}>
+                {item.filename}
+              </p>
+              <div className={styles['kpi-hover-meta']}>
                 {item.dateLabel && (
                   <span className={styles['kpi-hover-date']}>{item.dateLabel}</span>
                 )}
-              </div>
-              <div className={styles['kpi-hover-meta']}>
                 <span className={styles[`kpi-hover-sentiment-${item.sentiment}`]}>
                   {label}
                 </span>
