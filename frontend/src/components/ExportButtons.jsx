@@ -8,7 +8,7 @@ export default function ExportSection({ jobId }) {
 
   return (
     <Button variant="secondary" size="sm" onClick={handleExport}>
-      Download Word Report
+      Download Report
     </Button>
   );
 }

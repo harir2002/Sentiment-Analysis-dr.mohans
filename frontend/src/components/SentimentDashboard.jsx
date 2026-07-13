@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Card, CardHeader, Badge, Alert, Skeleton, EmptyState, SentimentBadge, ResultField } from './ui';
-import { listCalls, deleteRecording } from '../services/api';
+import { Card, CardHeader, Badge, Alert, Skeleton, EmptyState, SentimentBadge, ResultField, Button } from './ui';
+import { listCalls, deleteRecording, downloadWordReport } from '../services/api';
 import ExecutiveDashboardHeader from './ExecutiveDashboardHeader';
 import DashboardKpiRow from './DashboardKpiRow';
 import DashboardSentimentStory from './DashboardSentimentStory';
@@ -32,12 +32,24 @@ function confirmDelete(filename) {
 }
 
 // DashboardSummary component - top-level metrics.
-function DashboardSummary({ records }) {
+function DashboardSummary({ records, sentimentFilter, onSentimentFilterChange }) {
   return (
     <div className={styles['dashboard-summary']}>
-      <DashboardKpiRow records={records} />
+      <DashboardKpiRow
+        records={records}
+        sentimentFilter={sentimentFilter}
+        onSentimentFilterChange={onSentimentFilterChange}
+      />
     </div>
   );
+}
+
+function recordMatchesSentimentFilter(record, sentimentFilter) {
+  if (!sentimentFilter) return true;
+  if (!record.results_ready) return false;
+  const { sentimentLabel, isValidCall } = getRecordingAssessment(record);
+  if (!isValidCall || sentimentLabel === 'invalid') return false;
+  return sentimentLabel === sentimentFilter;
 }
 
 // Compact result summary inside an expanded recording
@@ -74,6 +86,7 @@ function RecordResultSummary({ result }) {
 
 // ExpandableRecordCard component - individual record with inline expansion
 function ExpandableRecordCard({ record, index, onToggleExpand, expanded, onRemove }) {
+  const [downloading, setDownloading] = useState(false);
   const recordId = generateRecordingId(index);
 
   // Canonical result: the single solution output that represents this recording
@@ -126,6 +139,19 @@ function ExpandableRecordCard({ record, index, onToggleExpand, expanded, onRemov
     navigateToTicket(record.job_id, record);
   };
 
+  const handleDownloadReport = async (e) => {
+    e.stopPropagation();
+    if (!resultsReady || downloading) return;
+    setDownloading(true);
+    try {
+      await downloadWordReport(record.job_id);
+    } catch (err) {
+      window.alert(err.message || 'Failed to download report');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const panelId = `record-panel-${record.job_id}`;
 
   return (
@@ -159,6 +185,16 @@ function ExpandableRecordCard({ record, index, onToggleExpand, expanded, onRemov
           <Badge variant={statusVariant} className={styles['record-card-status']}>
             {statusLabel}
           </Badge>
+          {resultsReady && (
+            <button
+              type="button"
+              className={`${styles['ticket-cta-btn']} dash-btn`}
+              onClick={handleDownloadReport}
+              disabled={downloading}
+            >
+              {downloading ? 'Downloading…' : 'Download Report'}
+            </button>
+          )}
           <button
             type="button"
             className={`${styles['ticket-cta-btn']} dash-btn dash-btn-primary`}
@@ -317,6 +353,8 @@ export default function SentimentDashboard({ mode = 'dashboard' }) {
   const [expandedIds, setExpandedIds] = useState(new Set());
   const [deleting, setDeleting] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [sentimentFilter, setSentimentFilter] = useState(null);
+  const [bulkDownloading, setBulkDownloading] = useState(false);
   const recordsListRef = useRef(null);
 
   const fetchRecords = useCallback(async (silent = false) => {
@@ -366,11 +404,44 @@ export default function SentimentDashboard({ mode = 'dashboard' }) {
     }
   };
 
+  const handleSentimentFilterChange = (next) => {
+    setSentimentFilter(next);
+    if (next && recordsListRef.current) {
+      recordsListRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleDownloadLatestReady = async () => {
+    const candidates = [...records]
+      .filter((r) => r.results_ready)
+      .filter((r) => recordMatchesSentimentFilter(r, sentimentFilter))
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const target = candidates[0];
+    if (!target) {
+      window.alert('No completed call analysis is available to download yet.');
+      return;
+    }
+    setBulkDownloading(true);
+    try {
+      await downloadWordReport(target.job_id);
+    } catch (err) {
+      window.alert(err.message || 'Failed to download report');
+    } finally {
+      setBulkDownloading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className={styles['sentiment-dashboard']}>
         {mode === 'dashboard' && <ExecutiveDashboardHeader records={[]} />}
-        {mode === 'dashboard' && <DashboardKpiRow records={[]} />}
+        {mode === 'dashboard' && (
+          <DashboardKpiRow
+            records={[]}
+            sentimentFilter={sentimentFilter}
+            onSentimentFilterChange={handleSentimentFilterChange}
+          />
+        )}
         <div className={styles['records-section']}>
           <Card>
             <CardHeader title={mode === 'crm' ? 'Loading tickets…' : 'Loading recordings…'} />
@@ -396,7 +467,13 @@ export default function SentimentDashboard({ mode = 'dashboard' }) {
     return (
       <div className={styles['sentiment-dashboard']}>
         {mode === 'dashboard' && <ExecutiveDashboardHeader records={[]} lastUpdated={lastUpdated} />}
-        {mode === 'dashboard' && <DashboardKpiRow records={[]} />}
+        {mode === 'dashboard' && (
+          <DashboardKpiRow
+            records={[]}
+            sentimentFilter={sentimentFilter}
+            onSentimentFilterChange={handleSentimentFilterChange}
+          />
+        )}
         {mode === 'dashboard' && <DashboardSentimentStory records={[]} />}
         <div className={styles['records-section']} ref={recordsListRef}>
           <EmptyState
@@ -417,39 +494,95 @@ export default function SentimentDashboard({ mode = 'dashboard' }) {
   const sortedRecords = [...records].sort(
     (a, b) => new Date(b.created_at) - new Date(a.created_at)
   );
+  const visibleRecords = sortedRecords.filter((record) =>
+    recordMatchesSentimentFilter(record, sentimentFilter)
+  );
+  const filterLabel =
+    sentimentFilter === 'positive'
+      ? 'Positive'
+      : sentimentFilter === 'negative'
+        ? 'Negative'
+        : null;
 
   return (
     <div className={styles['sentiment-dashboard']}>
       {mode === 'dashboard' && <ExecutiveDashboardHeader records={records} lastUpdated={lastUpdated} />}
 
-      {mode === 'dashboard' && <DashboardSummary records={records} />}
+      {mode === 'dashboard' && (
+        <DashboardSummary
+          records={records}
+          sentimentFilter={sentimentFilter}
+          onSentimentFilterChange={handleSentimentFilterChange}
+        />
+      )}
 
       {mode === 'dashboard' && <DashboardSentimentStory records={records} />}
 
       <div className={styles['records-section']} ref={recordsListRef}>
         <Card className={`${styles['records-header-card']} records-header-card`}>
-          <CardHeader
-            title={mode === 'crm' ? 'CRM Ticket Explorer' : 'Record Explorer'}
-            subtitle={
-              mode === 'crm'
-                ? `${records.length} ticket${records.length !== 1 ? 's' : ''} — open any ticket or expand a row for CRM details`
-                : `${records.length} recording${records.length !== 1 ? 's' : ''} — click any row to expand details, or open the full ticket`
-            }
-          />
+          <div className={styles['records-header-row']}>
+            <CardHeader
+              title={
+                mode === 'crm'
+                  ? 'CRM Ticket Explorer'
+                  : filterLabel
+                    ? `${filterLabel} Calls`
+                    : 'Record Explorer'
+              }
+              subtitle={
+                mode === 'crm'
+                  ? `${visibleRecords.length} ticket${visibleRecords.length !== 1 ? 's' : ''} — open any ticket or expand a row for CRM details`
+                  : filterLabel
+                    ? `${visibleRecords.length} ${filterLabel.toLowerCase()} call${visibleRecords.length !== 1 ? 's' : ''} — clear the filter to see all recordings`
+                    : `${records.length} recording${records.length !== 1 ? 's' : ''} — click Positive or Negative above to drill down, or open a full ticket`
+              }
+            />
+            <div className={styles['records-header-actions']}>
+              {filterLabel && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleSentimentFilterChange(null)}
+                >
+                  Clear {filterLabel} filter
+                </Button>
+              )}
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleDownloadLatestReady}
+                disabled={bulkDownloading}
+              >
+                {bulkDownloading ? 'Downloading…' : 'Download Report'}
+              </Button>
+            </div>
+          </div>
         </Card>
 
-        <div className={styles['records-list']}>
-          {sortedRecords.map((record, index) => (
-            <ExpandableRecordCard
-              key={record.job_id}
-              record={record}
-              index={index}
-              onToggleExpand={toggleExpand}
-              expanded={expandedIds.has(record.job_id)}
-              onRemove={handleRemoveRecording}
-            />
-          ))}
-        </div>
+        {visibleRecords.length === 0 ? (
+          <EmptyState
+            icon="🔍"
+            title={filterLabel ? `No ${filterLabel} Calls` : 'No Recordings'}
+            description={
+              filterLabel
+                ? `No ${filterLabel.toLowerCase()} calls match this filter. Clear the filter to see all recordings.`
+                : 'No recordings available.'
+            }
+          />
+        ) : (
+          <div className={styles['records-list']}>
+            {visibleRecords.map((record, index) => (
+              <ExpandableRecordCard
+                key={record.job_id}
+                record={record}
+                index={index}
+                onToggleExpand={toggleExpand}
+                expanded={expandedIds.has(record.job_id)}
+                onRemove={handleRemoveRecording}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

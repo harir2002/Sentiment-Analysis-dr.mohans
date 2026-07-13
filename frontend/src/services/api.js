@@ -102,7 +102,7 @@ export async function downloadWordReport(jobId) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `comparison-${jobId}.docx`;
+  a.download = `call-analysis-${jobId}.docx`;
   a.click();
   URL.revokeObjectURL(url);
 }

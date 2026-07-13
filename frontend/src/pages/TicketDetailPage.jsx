@@ -7,6 +7,7 @@ import {
   navigateToResults,
 } from '../utils/appNavigation';
 import { Alert, Badge, SentimentBadge, PriorityBadge, Skeleton } from '../components/ui';
+import ExportSection from '../components/ExportButtons';
 import styles from './TicketDetailPage.module.css';
 
 const WORKFLOW_PREFIX = 'ticket-workflow:';
@@ -158,6 +159,7 @@ export default function TicketDetailPage({ jobId }) {
           >
             View Results
           </button>
+          {ticket.resultsReady && <ExportSection jobId={jobId} />}
           <button
             type="button"
             className={`${styles['btn-secondary']} ${workflow.assigned ? styles['btn-active'] : ''}`}

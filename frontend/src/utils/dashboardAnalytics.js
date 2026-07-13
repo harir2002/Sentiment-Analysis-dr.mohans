@@ -155,7 +155,6 @@ export function computeSentimentMix(records = []) {
     { name: 'Positive', value: kpis.positive, color: '#22c55e' },
     { name: 'Neutral', value: kpis.neutral, color: '#f59e0b' },
     { name: 'Negative', value: kpis.negative, color: '#ef4444' },
-    { name: 'Unclassified', value: kpis.invalid, color: '#94a3b8' },
   ].filter((item) => item.value > 0);
 }
 
@@ -167,8 +166,8 @@ export function computeSentimentByDay(records = []) {
     if (!record.created_at || !record.results_ready) return;
 
     const { sentimentLabel, isValidCall } = getRecordingAssessment(record);
-    const bucketKey = isValidCall && sentimentLabel !== 'invalid' ? sentimentLabel : 'invalid';
-    if (!['positive', 'neutral', 'negative', 'invalid'].includes(bucketKey)) return;
+    if (!isValidCall || sentimentLabel === 'invalid') return;
+    if (!['positive', 'neutral', 'negative'].includes(sentimentLabel)) return;
 
     const key = dayKey(record.created_at);
     if (!buckets.has(key)) {
@@ -179,13 +178,12 @@ export function computeSentimentByDay(records = []) {
         positive: 0,
         neutral: 0,
         negative: 0,
-        invalid: 0,
         total: 0,
       });
     }
 
     const bucket = buckets.get(key);
-    bucket[bucketKey]++;
+    bucket[sentimentLabel]++;
     bucket.total++;
   });
 
@@ -382,10 +380,6 @@ export function computeExecutiveHeadline(records = []) {
     parts.push(
       `${kpis.callsAnalyzed} call${kpis.callsAnalyzed !== 1 ? 's' : ''} classified (${kpis.positive} positive, ${kpis.neutral} neutral, ${kpis.negative} negative)`
     );
-  }
-
-  if (kpis.invalid > 0) {
-    parts.push(`${kpis.invalid} unclassified — review audio quality or transcript coverage`);
   }
 
   if (kpis.urgentAction > 0) {

@@ -19,9 +19,7 @@ from docx.shared import Inches, Pt, RGBColor
 
 from app.models.schemas import JobResponse
 from app.services.export_report import (
-    COMPARISON_COLUMNS,
     TEST_CASE_COLUMNS,
-    ComparisonReport,
     build_comparison_report,
 )
 
@@ -290,107 +288,95 @@ def export_job_pdf(job: JobResponse) -> bytes:
     return buffer.getvalue()
 
 
-def _add_word_table(doc: Document, headers: list[str], rows: list[list[str]]) -> None:
-    table = doc.add_table(rows=1, cols=len(headers))
-    table.style = "Table Grid"
-    hdr_cells = table.rows[0].cells
-    for i, header in enumerate(headers):
-        hdr_cells[i].text = header
-        for paragraph in hdr_cells[i].paragraphs:
-            for run in paragraph.runs:
-                run.bold = True
-            paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-    for row in rows:
-        cells = table.add_row().cells
-        for i, value in enumerate(row):
-            cells[i].text = value
-
-    doc.add_paragraph()
-
-
 def export_job_word(job: JobResponse) -> bytes:
-    report = build_comparison_report(job)
+    """Generate a call-analysis-only Word report (no ticket/CRM metadata)."""
+    from app.services.recommended_action import enrich_analysis
+
     doc = Document()
 
-    h = report.header
-    title = doc.add_heading(h.project_name, level=0)
+    title = doc.add_heading("Call Analysis Report", level=0)
     title.alignment = WD_ALIGN_PARAGRAPH.LEFT
 
-    subtitle = doc.add_paragraph(h.report_title)
-    subtitle.runs[0].font.size = Pt(14)
-    subtitle.runs[0].font.color.rgb = RGBColor(102, 102, 102)
+    subtitle = doc.add_paragraph("Dr. Mohan's Diabetes Specialities Centre")
+    if subtitle.runs:
+        subtitle.runs[0].font.size = Pt(14)
+        subtitle.runs[0].font.color.rgb = RGBColor(102, 102, 102)
 
-    doc.add_heading("Job Details", level=1)
-    job_meta = doc.add_paragraph()
-    job_meta.add_run(f"Date: {h.date}\n").bold = True
-    job_meta.add_run(f"Version: {h.version}\n")
-    job_meta.add_run(f"Prepared by: {h.prepared_by}\n")
-    job_meta.add_run(f"Job ID: {h.job_id}\n")
-
-    doc.add_heading("Audio Details", level=1)
-    audio_meta = doc.add_paragraph()
-    audio_meta.add_run(f"Audio file: {h.audio_filename}\n")
-    audio_meta.add_run(f"Call reference: {h.call_reference}\n")
-
-    doc.add_heading("Summary", level=1)
-    s = report.summary
-    summary_lines = [
-        report.summary.comparison_note,
-        f"Total pipelines evaluated: {s.total_test_cases}",
-        f"Passed: {s.passed_count}",
-        f"Failed: {s.failed_count}",
-        f"Neutral: {s.neutral_count}",
-        f"Best-performing solution: {s.best_solution}",
-    ]
-    for line in summary_lines:
-        doc.add_paragraph(line, style="List Bullet")
-
-    doc.add_heading("4-Solution Comparison", level=1)
-    _add_word_table(
-        doc,
-        COMPARISON_COLUMNS,
-        [row.as_list() for row in report.comparison_rows],
+    report_date = job.completed_at or job.created_at
+    date_str = (
+        report_date.strftime("%d %B %Y, %H:%M")
+        if report_date
+        else "—"
     )
 
-    doc.add_heading("Per-Solution Observations", level=1)
-    for obs in report.observations:
-        doc.add_heading(obs.solution, level=2)
-        lines = [
-            f"Status: {obs.status}",
-            f"Sentiment: {obs.sentiment}",
-            f"Confidence: {obs.confidence}",
-            f"Resolution: {obs.resolution_status}",
-            f"Score: {obs.score}",
-            f"Summary: {obs.summary}",
-            f"Key issues: {obs.key_issues}",
-            f"Recommended action: {obs.recommended_action}",
-            f"Priority: {obs.action_priority}",
-            f"Assigned team: {obs.assigned_team}",
-            f"Escalation status: {obs.escalation_status}",
-            f"Action items: {obs.action_items}",
-            f"Notes: {obs.notes}",
-        ]
-        if obs.error and obs.error != "—":
-            lines.append(f"Error: {obs.error}")
-        for line in lines:
-            doc.add_paragraph(line)
-        doc.add_paragraph("Transcript:")
-        doc.add_paragraph(obs.transcript)
-        doc.add_paragraph()
+    doc.add_heading("Call Details", level=1)
+    details = doc.add_paragraph()
+    details.add_run(f"Audio file: {job.audio_filename or '—'}\n")
+    details.add_run(f"Analysed on: {date_str}\n")
+    if job.call_reference:
+        details.add_run(f"Call reference: {job.call_reference}\n")
 
-    doc.add_heading("Final Comparison Result", level=1)
-    if report.final_comparison:
-        final = report.final_comparison
-        doc.add_paragraph(
-            f"Recommended solution: {final.winner} (score {final.winner_score})"
-        )
-        if final.rankings:
-            doc.add_paragraph("Rankings:")
-            for entry in final.rankings:
-                doc.add_paragraph(entry, style="List Bullet")
+    # Prefer the canonical / winning completed analysis.
+    completed = [
+        r for r in (job.results or []) if r.status == "completed" and r.analysis
+    ]
+    preferred_id = job.final_solution_id
+    if not preferred_id and job.ranking and job.ranking.winner:
+        preferred_id = job.ranking.winner.solution_id
+    result = None
+    if preferred_id:
+        result = next((r for r in completed if r.solution_id == preferred_id), None)
+    if result is None and completed:
+        result = completed[0]
+
+    if result is None:
+        doc.add_heading("Analysis", level=1)
+        doc.add_paragraph("No completed call analysis is available for this recording.")
+        buffer = io.BytesIO()
+        doc.save(buffer)
+        return buffer.getvalue()
+
+    analysis = enrich_analysis(result.analysis, transcript=result.transcript or "")
+    sentiment = (analysis.sentiment or job.final_sentiment or "—").strip()
+    confidence = analysis.confidence
+    confidence_text = f"{confidence * 100:.0f}%" if confidence is not None else "—"
+
+    doc.add_heading("Sentiment", level=1)
+    sent_para = doc.add_paragraph()
+    sent_para.add_run(f"Sentiment: {sentiment}\n").bold = True
+    sent_para.add_run(f"Confidence: {confidence_text}\n")
+    if analysis.resolution_status:
+        sent_para.add_run(f"Resolution: {analysis.resolution_status}\n")
+
+    doc.add_heading("Summary", level=1)
+    doc.add_paragraph(analysis.summary or "No summary available.")
+
+    doc.add_heading("Key Observations", level=1)
+    if analysis.key_issues:
+        for issue in analysis.key_issues:
+            doc.add_paragraph(str(issue), style="List Bullet")
     else:
-        doc.add_paragraph("Ranking data was not available for this job.")
+        doc.add_paragraph("No key observations recorded.")
+
+    doc.add_heading("Recommendation / Next Steps", level=1)
+    if analysis.recommended_action:
+        doc.add_paragraph(analysis.recommended_action)
+    action_items = list(analysis.action_items or [])
+    # Avoid duplicating the primary recommended action in the bullet list.
+    primary = (analysis.recommended_action or "").strip().lower()
+    extras = [item for item in action_items if item and item.strip().lower() != primary]
+    if extras:
+        for item in extras:
+            doc.add_paragraph(str(item), style="List Bullet")
+    if not analysis.recommended_action and not extras:
+        doc.add_paragraph("No recommendation available.")
+
+    if analysis.notes:
+        doc.add_heading("Analyst Notes", level=1)
+        doc.add_paragraph(analysis.notes)
+
+    doc.add_heading("Transcript", level=1)
+    doc.add_paragraph(result.transcript or "Transcript not available.")
 
     buffer = io.BytesIO()
     doc.save(buffer)

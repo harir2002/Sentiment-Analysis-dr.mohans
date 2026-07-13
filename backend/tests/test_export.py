@@ -113,10 +113,40 @@ def test_export_job_word_is_docx_bytes():
     assert content[:2] == b"PK"
 
 
-def test_export_job_word_includes_all_four_solutions():
+def test_export_job_word_is_call_analysis_only():
+    """Word report focuses on call analysis — no ticket/CRM or pipeline comparison."""
+    from io import BytesIO
+
+    from docx import Document
+
+    content = export_job_word(_sample_job())
+    doc = Document(BytesIO(content))
+    text = "\n".join(p.text for p in doc.paragraphs)
+
+    assert "Call Analysis Report" in text
+    assert "Customer reported appointment delay" in text
+    assert "Sentiment:" in text
+    assert "Confidence:" in text
+    assert "Recommendation / Next Steps" in text or "Recommended" in text or "appointment delay" in text
+    assert "Transcript" in text
+
+    # Ticket / CRM / multi-pipeline comparison content must not appear.
+    assert "Assigned team" not in text
+    assert "Escalation status" not in text
+    assert "Priority:" not in text
+    assert "4-Solution Comparison" not in text
+    assert "Job ID:" not in text
+    assert "Final Comparison Result" not in text
+    assert "Prepared by:" not in text
+
+
+def test_export_job_word_includes_completed_analysis():
     content = export_job_word(_sample_job())
     assert len(content) > 1000
-    report = build_comparison_report(_sample_job())
-    assert len(report.comparison_rows) == 4
-    for row in report.comparison_rows:
-        assert row.solution != "—"
+    from io import BytesIO
+    from docx import Document
+
+    doc = Document(BytesIO(content))
+    text = "\n".join(p.text for p in doc.paragraphs)
+    assert "negative" in text.lower()
+    assert "Customer called about appointment delay." in text

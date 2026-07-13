@@ -124,13 +124,6 @@ export function SentimentByDayChart({ records }) {
             name="Negative"
             stackId="sentiment"
             fill={SENTIMENT_COLORS.negative}
-            radius={[0, 0, 0, 0]}
-          />
-          <Bar
-            dataKey="invalid"
-            name="Invalid"
-            stackId="sentiment"
-            fill="#94a3b8"
             radius={[4, 4, 0, 0]}
           />
         </BarChart>

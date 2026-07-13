@@ -37,8 +37,8 @@
 }
 
 .dash-card-interactive:focus-within {
-  border-color: rgba(231, 0, 11, 0.28);
-  box-shadow: var(--glow-red);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-lift-subtle);
 }
 
 /* ── KPI cards ── */
@@ -51,8 +51,8 @@
 }
 
 .kpi-card:hover {
-  border-color: rgba(231, 0, 11, 0.38) !important;
-  box-shadow: var(--shadow-lift), inset 0 0 0 1px rgba(231, 0, 11, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  box-shadow: var(--shadow-lift) !important;
   transform: translateY(-2px);
 }
 
@@ -69,13 +69,13 @@
 
 .hero-chart-card:hover,
 .action-card:hover {
-  border-color: rgba(231, 0, 11, 0.22);
+  border-color: rgba(255, 255, 255, 0.16);
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.48);
   transform: translateY(-1px);
 }
 
 .records-header-card:hover {
-  border-color: rgba(231, 0, 11, 0.18);
+  border-color: rgba(255, 255, 255, 0.14);
   box-shadow: var(--shadow-lift-subtle);
 }
 

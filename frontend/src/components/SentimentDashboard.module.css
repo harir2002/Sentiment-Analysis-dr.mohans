@@ -52,7 +52,7 @@
 
 .kpi-row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.25rem;
   width: 100%;
 }
@@ -62,12 +62,17 @@
   flex-direction: column;
   gap: 0.75rem;
   padding: 1.5rem 1.75rem;
-  background: #0d0d0d;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #121212;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
   min-height: 120px;
   justify-content: center;
   cursor: default;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  width: 100%;
 }
 
 .kpi-label {
@@ -76,6 +81,10 @@
   color: rgba(255, 255, 255, 0.55);
   letter-spacing: 0.02em;
   text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .kpi-value {
@@ -86,10 +95,10 @@
   letter-spacing: -0.03em;
 }
 
-/* First card — red accent border like reference */
+/* First card — subtle surface accent, no red outline */
 .kpi-card-accent {
-  border-color: rgba(231, 0, 11, 0.45);
-  box-shadow: inset 0 0 0 1px rgba(231, 0, 11, 0.12);
+  border-color: rgba(255, 255, 255, 0.14);
+  background: linear-gradient(160deg, #151515 0%, #101010 100%);
 }
 
 .kpi-card-accent .kpi-value {
@@ -110,6 +119,29 @@
 
 .kpi-card-invalid .kpi-value {
   color: #94a3b8;
+}
+
+.kpi-card-interactive {
+  cursor: pointer;
+}
+
+.kpi-card-interactive:hover,
+.kpi-card-interactive:focus-visible {
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.38);
+  outline: none;
+}
+
+.kpi-card-active {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: #171717;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+
+.kpi-drill-arrow {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
 }
 
 .kpi-suffix {
@@ -406,6 +438,22 @@
   flex-direction: column;
   gap: 1rem;
   padding-top: 0.5rem;
+}
+
+.records-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.records-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-shrink: 0;
+  padding: 0.25rem 0;
 }
 
 .records-header-card {

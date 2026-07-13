@@ -155,8 +155,7 @@ function SentimentByDayChart({ records }) {
           <Legend verticalAlign="bottom" height={36} iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11, color: CHART_THEME.axis }} />
           <Bar dataKey="positive" name="Positive" stackId="s" fill={SENTIMENT_COLORS.positive} />
           <Bar dataKey="neutral" name="Neutral" stackId="s" fill={SENTIMENT_COLORS.neutral} />
-          <Bar dataKey="negative" name="Negative" stackId="s" fill={SENTIMENT_COLORS.negative} />
-          <Bar dataKey="invalid" name="Unclassified" stackId="s" fill={SENTIMENT_COLORS.invalid} radius={[4, 4, 0, 0]} />
+          <Bar dataKey="negative" name="Negative" stackId="s" fill={SENTIMENT_COLORS.negative} radius={[4, 4, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </ChartShell>
